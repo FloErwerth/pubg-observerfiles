@@ -27,17 +27,17 @@ namespace PubgObserver
                 parser.SetDelimiters(",");
                 parser.HasFieldsEnclosedInQuotes = true;
                 parser.TrimWhiteSpace = false;
-                if (parser.EndOfData) throw new IOException("Die Team-CSV ist leer.");
+                if (parser.EndOfData) throw new IOException(Language.Text("emptyCsv"));
                 result.Headers = parser.ReadFields();
                 if (result.Column("TeamNumber") < 0 || result.Column("ImageFileName") < 0 ||
                     result.Headers.Distinct(StringComparer.OrdinalIgnoreCase).Count() != result.Headers.Length)
-                    throw new IOException("CSV benoetigt eindeutige Spalten TeamNumber und ImageFileName.");
+                    throw new IOException(Language.Text("csvColumns"));
                 while (!parser.EndOfData)
                 {
                     var row = parser.ReadFields();
                     int team;
                     if (row.Length != result.Headers.Length || !Int32.TryParse(row[result.Column("TeamNumber")], out team) || team < 1 || !result.teams.Add(team))
-                        throw new IOException("Ungueltige CSV-Zeile oder doppelte Teamnummer.");
+                        throw new IOException(Language.Text("csvRow"));
                     result.Rows.Add(row);
                 }
             }

@@ -134,3 +134,24 @@ try {
     if ($form.Controls['FillMissing'].Visible) { throw 'Checkbox bei vollstaendigem eigenem Paket sichtbar.' }
 } finally { $form.Dispose() }
 Write-Output 'Emoji-Ergaenzung: alle Pakete, Luecken, bestehende Zuordnungen, Kollisionen, Custom-CSV, Fehlerfall und Checkbox erfolgreich geprueft.'
+
+foreach ($case in @(@('de-DE', 'de'), @('de-CH', 'de'), @('en-US', 'en'), @('fr-FR', 'en'), @('ja-JP', 'en'))) {
+    if ([PubgObserver.Language]::Detect([Globalization.CultureInfo]::GetCultureInfo($case[0])) -ne $case[1]) { throw 'Falscher Sprach-Fallback.' }
+}
+[PubgObserver.Language]::Select('system')
+$form = New-Object PubgObserver.MainForm
+try {
+    if ($form.Controls['LanguageSelection'].SelectedIndex -ne 0 -or [PubgObserver.Language]::Current -ne [PubgObserver.Language]::SystemLanguage) { throw 'Systemsprache nicht Standard.' }
+    $form.Controls['PackSelection'].SelectedIndex = 2
+    $form.Controls['FillMissing'].Checked = $true
+    $form.Controls['LanguageSelection'].SelectedIndex = 2
+    if (-not $form.Controls['FillMissing'].Text.Contains([string][char]0x00FC)) { throw 'Deutscher Umlaut fehlt.' }
+    if ([PubgObserver.Language]::Current -ne 'de') { throw 'Deutsch nicht ausgewaehlt.' }
+    $form.Controls['LanguageSelection'].SelectedIndex = 1
+    if ($form.Controls['FillMissing'].Text -ne 'Fill missing assignments with emojis') { throw 'Englische Uebersetzung fehlt.' }
+    if ($form.Controls['PackSelection'].SelectedIndex -ne 2 -or -not $form.Controls['FillMissing'].Checked) { throw 'Sprachwechsel verliert die Auswahl.' }
+    if ($form.Controls['Donate'].Tag -ne 'https://paypal.me/ErwerthFlorian' -or $form.Controls['Donate'].Text -ne 'Buy me a coffee') { throw 'PayPal-Link falsch.' }
+    $form.Controls['LanguageSelection'].SelectedIndex = 0
+    if ([PubgObserver.Language]::Current -ne [PubgObserver.Language]::SystemLanguage) { throw 'Rueckkehr zur Systemsprache fehlgeschlagen.' }
+} finally { $form.Dispose() }
+Write-Output 'Deutsch, Englisch, System-Fallback, Umlaute, Auswahl-Erhalt und PayPal-Link erfolgreich geprueft.'
