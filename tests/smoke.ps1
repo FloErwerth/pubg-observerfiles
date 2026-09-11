@@ -166,7 +166,6 @@ foreach ($i in @(0, 1, 2)) {
         $bitmap = New-Object Drawing.Bitmap((Join-Path $numbered ('TeamIcon\' + $row.ImageFileName)))
         try {
             if ($bitmap.Width -ne 128 -or $bitmap.Height -ne 128) { throw 'Falsche Icon-Abmessung.' }
-            if ($bitmap.GetPixel(127,127).ToArgb() -ne [Drawing.Color]::FromArgb(255,17,24,39).ToArgb()) { throw 'Kontrastflaeche fehlt.' }
             $white = 0
             for ($y = 66; $y -lt 128; $y++) { for ($x = 54; $x -lt 128; $x++) { $pixel=$bitmap.GetPixel($x,$y); if ($pixel.R -gt 240 -and $pixel.G -gt 240 -and $pixel.B -gt 240) { $white++ } } }
             if ($white -lt 40) { throw 'Nummer ist leer oder zu klein.' }
@@ -191,3 +190,15 @@ try {
     if ($form.Controls['AddNumbers'].Checked) { throw 'Ausgeschaltete Nummerierung beim Wechsel verloren.' }
 } finally { $form.Dispose() }
 Write-Output 'Nummerierung aller 300 Team-Zuordnungen, Originalschutz, geteilte Bilder und Checkbox erfolgreich geprueft.'
+$transparent = New-Object Drawing.Bitmap(128,128)
+$outlined = [PubgObserver.TeamNumbers]::Render($transparent,100)
+try {
+    if ($outlined.GetPixel(60,70).A -ne 0 -or $outlined.GetPixel(127,127).A -ne 0) { throw 'Nummern duerfen keine Hintergrundflaeche erzeugen.' }
+    $black = 0; $white = 0
+    for ($y=0; $y -lt 128; $y++) { for ($x=0; $x -lt 128; $x++) {
+        $p=$outlined.GetPixel($x,$y)
+        if ($p.A -gt 200 -and $p.R -lt 20 -and $p.G -lt 20 -and $p.B -lt 20) { $black++ }
+        if ($p.A -gt 200 -and $p.R -gt 240 -and $p.G -gt 240 -and $p.B -gt 240) { $white++ }
+    } }
+    if ($black -lt 40 -or $white -lt 40) { throw 'Weisse Ziffern oder schwarze Kontur fehlen.' }
+} finally { $outlined.Dispose(); $transparent.Dispose() }

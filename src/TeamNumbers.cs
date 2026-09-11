@@ -2,7 +2,6 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 
@@ -25,24 +24,27 @@ namespace PubgObserver
                 float height = image.Height * ratio;
                 graphics.DrawImage(image, (size - width) / 2, (size - height) / 2, width, height);
                 string text = team.ToString(CultureInfo.InvariantCulture);
-                int badgeWidth = text.Length > 2 ? 94 : 74;
-                var badge = new Rectangle(size - badgeWidth, 66, badgeWidth, 62);
-                using (var background = new SolidBrush(Color.FromArgb(255, 17, 24, 39))) graphics.FillRectangle(background, badge);
-                graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                using (var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap })
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using (var path = new GraphicsPath())
+                using (var family = new FontFamily("Arial"))
                 {
-                    float fontSize = 54;
-                    Font font = new Font("Arial", fontSize, FontStyle.Bold, GraphicsUnit.Pixel);
-                    try
+                    path.AddString(text, family, (int)FontStyle.Bold, 54, Point.Empty, StringFormat.GenericTypographic);
+                    var bounds = path.GetBounds();
+                    float textScale = Math.Min(1f, 88f / bounds.Width);
+                    using (var transform = new Matrix())
                     {
-                        while (graphics.MeasureString(text, font).Width > badgeWidth - 6 && fontSize > 10)
-                        {
-                            font.Dispose();
-                            font = new Font("Arial", --fontSize, FontStyle.Bold, GraphicsUnit.Pixel);
-                        }
-                        graphics.DrawString(text, font, Brushes.White, badge, format);
+                        transform.Translate(-bounds.X, -bounds.Y);
+                        path.Transform(transform);
+                        transform.Reset();
+                        transform.Scale(textScale, textScale);
+                        path.Transform(transform);
+                        bounds = path.GetBounds();
+                        transform.Reset();
+                        transform.Translate(size - 5 - bounds.Width, size - 5 - bounds.Height);
+                        path.Transform(transform);
                     }
-                    finally { font.Dispose(); }
+                    using (var outline = new Pen(Color.Black, 5) { LineJoin = LineJoin.Round }) graphics.DrawPath(outline, path);
+                    graphics.FillPath(Brushes.White, path);
                 }
             }
             return output;
