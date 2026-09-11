@@ -8,7 +8,7 @@ if ($PSVersionTable.PSEdition -eq 'Core') {
 Add-Type -AssemblyName System.Windows.Forms,System.Drawing,System.IO.Compression
 [Reflection.Assembly]::LoadFrom([IO.Path]::GetFullPath($InstallerPath)) | Out-Null
 $root = Join-Path ([IO.Path]::GetTempPath()) ('pubg-observer-test-' + [Guid]::NewGuid().ToString('N'))
-if (([PubgObserver.Installer]::PackIds -join ',') -ne 'flags-with-numbers,emojis,flags') { throw 'Falsche Paketauswahl.' }
+if (([PubgObserver.Installer]::PackIds -join ',') -ne 'flags,emojis') { throw 'Falsche Paketauswahl.' }
 $source = Join-Path $root 'pack'
 $target = Join-Path $root 'Saved\Observer'
 New-Item -ItemType Directory -Path (Join-Path $source 'TeamIcon') -Force | Out-Null
@@ -34,7 +34,7 @@ try { [PubgObserver.Installer]::Install($invalid, $target) } catch { $rejected =
 if (-not $rejected) { throw 'Ungueltiges Paket akzeptiert.' }
 if ((Get-Content -LiteralPath (Join-Path $target 'TeamInfo.csv')) -ne 'test-package') { throw 'Ziel nach Ablehnung veraendert.' }
 Write-Output "Alle 6 Smoke-Pruefungen erfolgreich. Testdaten: $root"
-for ($i = 0; $i -lt 3; $i++) {
+for ($i = 0; $i -lt [PubgObserver.Installer]::PackIds.Length; $i++) {
     $packTarget = Join-Path $root "embedded-$i\Observer"
     [PubgObserver.Installer]::InstallPack($i, $packTarget) | Out-Null
     $packSource = Join-Path $PSScriptRoot ("..\packages\" + [PubgObserver.Installer]::PackIds[$i] + '\Observer')
@@ -47,7 +47,7 @@ for ($i = 0; $i -lt 3; $i++) {
     }
     $csv = Get-ChildItem -LiteralPath $packTarget -Filter '*.csv'
     $rows = @(Import-Csv -LiteralPath $csv.FullName)
-    $expectedTeams = @(50, 100, 25)[$i]
+    $expectedTeams = @(25, 100)[$i]
     if ((($rows.TeamNumber | ForEach-Object { [int]$_ } | Sort-Object) -join ',') -ne ((1..$expectedTeams) -join ',')) { throw 'Teamnummern fehlen oder sind doppelt.' }
     foreach ($row in $rows) {
         if (-not (Test-Path -LiteralPath (Join-Path $packTarget ('TeamIcon\' + $row.ImageFileName)))) { throw "Paket verweist auf fehlendes Icon: $($row.ImageFileName)" }
@@ -57,13 +57,13 @@ for ($i = 0; $i -lt 3; $i++) {
 }
 $form = New-Object PubgObserver.MainForm
 if ($form.Controls['PackSelection'].SelectedIndex -ne 0) { throw 'Standardpaket falsch.' }
-$form.Controls['PackSelection'].SelectedIndex = 2
+$form.Controls['PackSelection'].SelectedIndex = 0
 if ($form.Controls['PackCoverage'].Text -notlike '*1-25*') { throw 'Abdeckung fuer Flaggen ohne Nummern fehlt.' }
 $form.Dispose()
-Write-Output 'Alle drei eingebetteten Pakete bytegenau geprueft; Flaggen mit Nummern sind vorausgewaehlt.'
+Write-Output 'Beide eingebetteten Pakete bytegenau geprueft; Flaggen sind vorausgewaehlt.'
 
 # Fill only missing team IDs; existing rows and image bytes must survive unchanged.
-foreach ($i in @(0, 1, 2)) {
+foreach ($i in @(0, 1)) {
     $filled = Join-Path $root "filled-$i\Observer"
     [PubgObserver.Installer]::InstallPack($i, $filled, $true) | Out-Null
     $rows = @(Import-Csv -LiteralPath (Join-Path $filled 'TeamInfo.csv'))
@@ -100,7 +100,7 @@ $customCsv = 'ImageFileName,TeamNumber,TeamTags,TeamName,Extra' + "`r`n" +
     'existing.png,3,THREE,Three,keep3' + "`r`n" +
     'existing.png,101,EXTRA,Extra,keep101' + "`r`n"
 [IO.File]::WriteAllText((Join-Path $custom 'TeamInfo.csv'), $customCsv)
-Copy-Item -LiteralPath (Join-Path $root 'embedded-2\Observer\TeamIcon\ITA.png') -Destination (Join-Path $custom 'TeamIcon\existing.png')
+Copy-Item -LiteralPath (Join-Path $root 'embedded-0\Observer\TeamIcon\ITA.png') -Destination (Join-Path $custom 'TeamIcon\existing.png')
 Set-Content -LiteralPath (Join-Path $custom 'TeamIcon\observer-emoji-2.png') -Value 'preserve-collision'
 $customTarget = Join-Path $root 'custom-target\Observer'
 [PubgObserver.Installer]::Install($custom, $customTarget, $true) | Out-Null
@@ -127,10 +127,10 @@ try {
     $form.Controls['FillMissing'].Checked = $true
     $form.Controls['PackSelection'].SelectedIndex = 1
     if ($form.Controls['FillMissing'].Visible -or $form.Controls['FillMissing'].Checked) { throw 'Checkbox bei 100 Teams nicht ausgeblendet.' }
-    $form.Controls['PackSelection'].SelectedIndex = 3
-    $form.Controls['SourceFolder'].Text = Join-Path $root 'embedded-2\Observer'
+    $form.Controls['PackSelection'].SelectedIndex = 2
+    $form.Controls['SourceFolder'].Text = Join-Path $root 'embedded-0\Observer'
     if (-not $form.Controls['FillMissing'].Visible) { throw 'Checkbox bei eigenem Paket fehlt.' }
-    $form.Controls['SourceFolder'].Text = Join-Path $root 'filled-2\Observer'
+    $form.Controls['SourceFolder'].Text = Join-Path $root 'filled-0\Observer'
     if ($form.Controls['FillMissing'].Visible) { throw 'Checkbox bei vollstaendigem eigenem Paket sichtbar.' }
 } finally { $form.Dispose() }
 Write-Output 'Emoji-Ergaenzung: alle Pakete, Luecken, bestehende Zuordnungen, Kollisionen, Custom-CSV, Fehlerfall und Checkbox erfolgreich geprueft.'
@@ -142,21 +142,21 @@ foreach ($case in @(@('de-DE', 'de'), @('de-CH', 'de'), @('en-US', 'en'), @('fr-
 $form = New-Object PubgObserver.MainForm
 try {
     if ($form.Controls['LanguageSelection'].SelectedIndex -ne 0 -or [PubgObserver.Language]::Current -ne [PubgObserver.Language]::SystemLanguage) { throw 'Systemsprache nicht Standard.' }
-    $form.Controls['PackSelection'].SelectedIndex = 2
+    $form.Controls['PackSelection'].SelectedIndex = 0
     $form.Controls['FillMissing'].Checked = $true
     $form.Controls['LanguageSelection'].SelectedIndex = 2
     if (-not $form.Controls['FillMissing'].Text.Contains([string][char]0x00FC)) { throw 'Deutscher Umlaut fehlt.' }
     if ([PubgObserver.Language]::Current -ne 'de') { throw 'Deutsch nicht ausgewaehlt.' }
     $form.Controls['LanguageSelection'].SelectedIndex = 1
     if ($form.Controls['FillMissing'].Text -ne 'Fill missing assignments with emojis') { throw 'Englische Uebersetzung fehlt.' }
-    if ($form.Controls['PackSelection'].SelectedIndex -ne 2 -or -not $form.Controls['FillMissing'].Checked) { throw 'Sprachwechsel verliert die Auswahl.' }
+    if ($form.Controls['PackSelection'].SelectedIndex -ne 0 -or -not $form.Controls['FillMissing'].Checked) { throw 'Sprachwechsel verliert die Auswahl.' }
     if ($form.Controls['Donate'].Tag -ne 'https://buymeacoffee.com/forli69' -or $form.Controls['Donate'].AccessibleName -ne 'Buy me a coffee' -or $null -eq $form.Controls['Donate'].BackgroundImage) { throw 'Buy-Me-a-Coffee-Button falsch.' }
     $form.Controls['LanguageSelection'].SelectedIndex = 0
     if ([PubgObserver.Language]::Current -ne [PubgObserver.Language]::SystemLanguage) { throw 'Rueckkehr zur Systemsprache fehlgeschlagen.' }
 } finally { $form.Dispose() }
 Write-Output 'Deutsch, Englisch, System-Fallback, Umlaute, Auswahl-Erhalt und Buy-Me-a-Coffee-Button erfolgreich geprueft.'
 
-foreach ($i in @(0, 1, 2)) {
+foreach ($i in @(0, 1)) {
     $numbered = Join-Path $root "numbered-$i\Observer"
     [PubgObserver.Installer]::InstallPack($i, $numbered, $true, $true) | Out-Null
     $rows = @(Import-Csv -LiteralPath (Join-Path $numbered 'TeamInfo.csv'))
@@ -189,7 +189,7 @@ try {
     $form.Controls['PackSelection'].SelectedIndex = 1
     if ($form.Controls['AddNumbers'].Checked) { throw 'Ausgeschaltete Nummerierung beim Wechsel verloren.' }
 } finally { $form.Dispose() }
-Write-Output 'Nummerierung aller 300 Team-Zuordnungen, Originalschutz, geteilte Bilder und Checkbox erfolgreich geprueft.'
+Write-Output 'Nummerierung aller 200 Team-Zuordnungen, Originalschutz, geteilte Bilder und Checkbox erfolgreich geprueft.'
 $transparent = New-Object Drawing.Bitmap(128,128)
 $outlined = [PubgObserver.TeamNumbers]::Render($transparent,100)
 try {

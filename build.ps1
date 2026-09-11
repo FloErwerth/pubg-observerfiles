@@ -9,7 +9,7 @@ $output = [IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Force -Path $output | Out-Null
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $resources = @("/resource:$PSScriptRoot\assets\buy-me-a-coffee.png,Brand.BuyMeACoffee.png")
-foreach ($pack in @('flags-with-numbers', 'emojis', 'flags')) {
+foreach ($pack in @('flags', 'emojis')) {
     $folder = Join-Path $PSScriptRoot "packages\$pack\Observer"
     if (-not (Test-Path -LiteralPath (Join-Path $folder 'TeamInfo.csv'))) { throw "Paket fehlt: $pack" }
     $archive = Join-Path $output "$pack.zip"

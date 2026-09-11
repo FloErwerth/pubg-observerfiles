@@ -6,9 +6,8 @@ Die folgenden Pakete wurden vom Projektinhaber als lokale Downloads bereitgestel
 
 | Paket | Urspruenglicher Ordner | Inhalt | Herkunft und Lizenz |
 | --- | --- | --- | --- |
-| Flaggen mit Nummern | observerfiles-flags-with-numbers | Teaminfo.csv und 50 PNGs | Nicht belegt |
 | Emojis | observerfiles-emojis | Teaminfo.csv und 100 PNGs | Nicht belegt |
-| Flaggen ohne Nummern | observerfiles-flags | CSV erweitert; 23 Original-PNGs plus 2 Projektgrafiken | Originaldateien: nicht belegt |
+| Flaggen | observerfiles-flags | CSV erweitert; 23 Original-PNGs plus 2 Projektgrafiken | Originaldateien: nicht belegt |
 
 Den Downloads lagen keine Lizenztexte oder Erstellerangaben bei. Die urspruenglichen Google-Drive-Links wurden nicht bereitgestellt. Die MIT-Lizenz des Installers erstreckt sich daher ausdruecklich nicht auf diese Dateien. Eine Erlaubnis zur Weitergabe dieser Pakete konnte im Rahmen der Release-Vorbereitung nicht bestaetigt werden.
 

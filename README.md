@@ -4,24 +4,23 @@ Observer-Dateien für PUBG mit wenigen Klicks installieren: Paket wählen, **Ins
 
 **[Windows-Installer herunterladen](https://github.com/FloErwerth/pubg-observerfiles/releases/latest/download/PUBG-Observer-Installer.exe)** · [Alle Releases](https://github.com/FloErwerth/pubg-observerfiles/releases) · [Problem melden](https://github.com/FloErwerth/pubg-observerfiles/issues)
 
-![Installer mit vorausgewählten Flaggen mit Nummern](docs/images/installer-0.png)
+![Installer mit vorausgewähltem Flaggen-Paket](docs/images/installer-0.png)
 
 ## Enthaltene Pakete
 
 | Auswahl | Inhalt |
 | --- | --- |
-| **Flaggen mit Nummern (Standard)** | 50 Team-Icons |
+| **Flaggen (Standard)** | 25 Team-Icons, Teams 1-25 |
 | Emojis | 100 Team-Icons |
-| Flaggen ohne Nummern | 25 Team-Icons, Teams 1-25 |
 | Eigener Observer-Ordner | Eigenes Paket mit TeamInfo.csv und TeamIcon |
 
-Alle drei Pakete sind direkt in der EXE enthalten. Es ist kein Internetzugang und kein Google-Drive-Login erforderlich.
+Beide Pakete sind direkt in der EXE enthalten. Nummern werden über die standardmäßig aktive Option hinzugefügt; ein separates Paket mit fest eingebrannten Nummern ist nicht mehr enthalten. Es ist kein Internetzugang und kein Google-Drive-Login erforderlich.
 
 <details>
 <summary>Weitere Ansichten</summary>
 
 ![Emoji-Paket](docs/images/installer-1.png)
-![Flaggen ohne Nummern](docs/images/installer-2.png)
+![Eigener Observer-Ordner](docs/images/installer-2.png)
 
 </details>
 
@@ -30,7 +29,7 @@ Alle drei Pakete sind direkt in der EXE enthalten. Es ist kein Internetzugang un
 1. Die EXE aus den [Releases](https://github.com/FloErwerth/pubg-observerfiles/releases/latest) herunterladen. Die Source-Code-Archive sind für Entwickler.
 2. PUBG schließen.
 3. `PUBG-Observer-Installer.exe` mit deinem normalen Windows-Benutzerkonto starten.
-4. Das gewünschte Paket auswählen. **Flaggen mit Nummern** ist vorausgewählt.
+4. Das gewünschte Paket auswählen. **Flaggen** ist vorausgewählt, die Nummerierungsoption ist aktiv.
 5. Optional **Fehlende Zuordnungen mit Emojis auffüllen** aktivieren, um fehlende Teams bis 100 zu ergänzen.
 6. **Installieren** anklicken und auf die Erfolgsmeldung warten. Danach PUBG starten.
 
@@ -50,8 +49,7 @@ Die Vorschau prüft die Lesbarkeit bei kleinen Bildgrößen; die konkrete Skalie
 
 Die Checkbox erscheint, wenn die ausgewählte CSV nicht alle Teamnummern 1 bis 100 enthält. Sie ist standardmäßig ausgeschaltet und wird beim Wechsel des Pakets zurückgesetzt. Die Prüfung funktioniert auch bei einem eigenen Observer-Ordner.
 
-- Flaggen mit Nummern: optional Emojis für Teams 51-100.
-- Flaggen ohne Nummern: optional Emojis für Teams 26-100.
+- Flaggen: optional Emojis für Teams 26-100.
 - Emojis: bereits vollständig, deshalb keine Checkbox.
 - Eigene CSV: auch Lücken mitten in der Teamnummernfolge werden ergänzt.
 
@@ -99,11 +97,11 @@ In Windows PowerShell oder PowerShell 7:
 
 Der Build nutzt den .NET-Framework-Compiler von Windows. Die Ausgabe liegt unter `dist/`; nur EXE und `SHA256SUMS.txt` werden für den Release benötigt. Die ZIP-Dateien sind Zwischenprodukte. `-OutputDirectory` erlaubt einen separaten Build-Ordner, falls eine bereits gestartete EXE die Standardausgabe sperrt. Test- und Render-Skript akzeptieren dazu `-InstallerPath`.
 
-Die Tests prüfen Erstinstallation, Backup, Ersetzung, ungueltige Quellen, die SHA-256-Werte aller 178 Paketdateien, Teamnummern und Bildverweise sowie die vorausgewählte Auswahl. Alle Installationen erfolgen dabei in separaten temporaeren Testordnern. Ein Funktionstest innerhalb von PUBG steht aus. Die Ansichten werden direkt aus der Windows-Forms-Oberflaeche gerendert.
+Die Tests prüfen Erstinstallation, Backup, Ersetzung, ungueltige Quellen, die SHA-256-Werte aller 127 Paketdateien, Teamnummern und Bildverweise sowie die vorausgewählte Auswahl. Alle Installationen erfolgen dabei in separaten temporaeren Testordnern. Ein Funktionstest innerhalb von PUBG steht aus. Die Ansichten werden direkt aus der Windows-Forms-Oberflaeche gerendert.
 
 ## Teams außerhalb des Pakets
 
-Die Zuordnung erfolgt ueber `TeamNumber` in der CSV. Das Paket ohne Nummern definiert Teams 1-25, die nummerierten Flaggen Teams 1-50 und Emojis Teams 1-100. Fuer weitere Teamnummern ist darin kein eigenes Bild hinterlegt. Team 24 (Italien) und Team 25 (Niederlande) wurden für dieses Projekt ergänzt; ihre PNGs lassen sich mit `scripts/generate-extra-flags.ps1` erneut erzeugen.
+Die Zuordnung erfolgt über `TeamNumber` in der CSV. Flaggen definiert Teams 1-25 und Emojis Teams 1-100. Für weitere Teamnummern ist ohne Emoji-Ergänzung kein eigenes Bild hinterlegt. Team 24 (Italien) und Team 25 (Niederlande) wurden für dieses Projekt ergänzt; ihre PNGs lassen sich mit `scripts/generate-extra-flags.ps1` erneut erzeugen.
 
 PUBG dokumentiert die normalen Teamnummern im Killfeed in den [Patch Notes 26.1](https://pubg.com/en/news/6717?category=patch_notes). Ein Rückfall auf diese Standardanzeige bei nicht definierten Teams ist plausibel, wurde aber für die aktuelle Spielversion nicht im Spiel verifiziert und ist in den gefundenen Quellen nicht ausdrücklich beschrieben. Ein fehlender CSV-Eintrag und ein CSV-Verweis auf eine fehlende Bilddatei sind unterschiedliche Faelle; Letzteres wird in den enthaltenen Paketen durch die Tests ausgeschlossen.
 

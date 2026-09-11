@@ -16,9 +16,9 @@ namespace PubgObserver
 {
     public static class Installer
     {
-        public static readonly string[] PackIds = { "flags-with-numbers", "emojis", "flags" };
-        public static string[] PackNames { get { return new[] { Language.Text("numbered"), Language.Text("emojis"), Language.Text("plain") }; } }
-        public static string[] PackCoverage { get { return new[] { Language.Text("coverage50"), Language.Text("coverage100"), Language.Text("coverage25") }; } }
+        public static readonly string[] PackIds = { "flags", "emojis" };
+        public static string[] PackNames { get { return new[] { Language.Text("plain"), Language.Text("emojis") }; } }
+        public static string[] PackCoverage { get { return new[] { Language.Text("coverage25"), Language.Text("coverage100") }; } }
 
         public static string InstallPack(int index, string target, bool fillWithEmojis = false, bool addNumbers = false)
         {
@@ -176,7 +176,7 @@ namespace PubgObserver
             packs.SelectedIndexChanged += delegate
             {
                 if (translating) return;
-                bool custom = packs.SelectedIndex == 3;
+                bool custom = packs.SelectedIndex == Installer.PackIds.Length;
                 source.Visible = browse.Visible = custom;
                 coverage.Visible = !custom;
                 coverage.Text = custom || packs.SelectedIndex < 0 ? "" : Installer.PackCoverage[packs.SelectedIndex];
@@ -248,7 +248,7 @@ namespace PubgObserver
                     packs.Items.AddRange(Installer.PackNames);
                     packs.Items.Add(Language.Text("custom"));
                     packs.SelectedIndex = selected;
-                    coverage.Text = selected < 0 || selected == 3 ? "" : Installer.PackCoverage[selected];
+                    coverage.Text = selected < 0 || selected == Installer.PackIds.Length ? "" : Installer.PackCoverage[selected];
                     status.Text = "";
                     UpdateFillOption();
                     fill.Checked = fill.Enabled && wasChecked;
@@ -287,8 +287,8 @@ namespace PubgObserver
             fillInfo.Text = "";
             try
             {
-                if (packs.SelectedIndex < 0 || (packs.SelectedIndex == 3 && String.IsNullOrWhiteSpace(source.Text))) return;
-                int missing = packs.SelectedIndex == 3 ? TeamCsv.MissingInFolder(source.Text) : TeamCsv.MissingInPack(packs.SelectedIndex);
+                if (packs.SelectedIndex < 0 || (packs.SelectedIndex == Installer.PackIds.Length && String.IsNullOrWhiteSpace(source.Text))) return;
+                int missing = packs.SelectedIndex == Installer.PackIds.Length ? TeamCsv.MissingInFolder(source.Text) : TeamCsv.MissingInPack(packs.SelectedIndex);
                 fill.Visible = fill.Enabled = missing > 0;
                 fillInfo.Text = missing > 0 ? String.Format(Language.Text("missing"), missing) : Language.Text("complete");
             }
@@ -299,7 +299,7 @@ namespace PubgObserver
         {
             try
             {
-                if (packs.SelectedIndex == 3 && String.IsNullOrWhiteSpace(source.Text)) throw new IOException(Language.Text("chooseFirst"));
+                if (packs.SelectedIndex == Installer.PackIds.Length && String.IsNullOrWhiteSpace(source.Text)) throw new IOException(Language.Text("chooseFirst"));
                 var running = Process.GetProcessesByName("TslGame");
                 bool gameRunning = running.Length > 0;
                 foreach (var process in running) process.Dispose();
@@ -307,7 +307,7 @@ namespace PubgObserver
                 install.Enabled = false;
                 UseWaitCursor = true;
                 bool fillMissing = fill.Enabled && fill.Checked;
-                string backup = packs.SelectedIndex == 3 ? Installer.Install(source.Text, Installer.DefaultTarget, fillMissing, numbers.Checked) : Installer.InstallPack(packs.SelectedIndex, Installer.DefaultTarget, fillMissing, numbers.Checked);
+                string backup = packs.SelectedIndex == Installer.PackIds.Length ? Installer.Install(source.Text, Installer.DefaultTarget, fillMissing, numbers.Checked) : Installer.InstallPack(packs.SelectedIndex, Installer.DefaultTarget, fillMissing, numbers.Checked);
                 status.Text = Language.Text("success");
                 MessageBox.Show(this, Language.Text("installed") + (backup == null ? "" : "\n\n" + Language.Text("backup") + "\n" + backup), Language.Text("done"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

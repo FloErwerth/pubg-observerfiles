@@ -12,7 +12,7 @@ $g = [Drawing.Graphics]::FromImage($canvas)
 $font = New-Object Drawing.Font('Segoe UI',11)
 try {
     $g.Clear([Drawing.Color]::FromArgb(235,239,245))
-    $samples = @(@('flags-with-numbers','1-CAN.png',1), @('flags','ITA.png',24), @('emojis','50.png',50), @('emojis','100.png',100))
+    $samples = @(@('flags','CAN.png',1), @('flags','ITA.png',24), @('emojis','50.png',50), @('emojis','100.png',100))
     for ($i=0; $i -lt $samples.Count; $i++) {
         $s=$samples[$i]
         $source = [Drawing.Image]::FromFile((Join-Path $PSScriptRoot ('..\packages\' + $s[0] + '\Observer\TeamIcon\' + $s[1])))
