@@ -9,8 +9,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("PUBG Observer Installer")]
 [assembly: AssemblyDescription("Installiert lokale Observer-Pakete fuer PUBG")]
-[assembly: AssemblyVersion("1.1.1.0")]
-[assembly: AssemblyFileVersion("1.1.1.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
 
 namespace PubgObserver
 {
@@ -20,7 +20,7 @@ namespace PubgObserver
         public static string[] PackNames { get { return new[] { Language.Text("numbered"), Language.Text("emojis"), Language.Text("plain") }; } }
         public static string[] PackCoverage { get { return new[] { Language.Text("coverage50"), Language.Text("coverage100"), Language.Text("coverage25") }; } }
 
-        public static string InstallPack(int index, string target, bool fillWithEmojis = false)
+        public static string InstallPack(int index, string target, bool fillWithEmojis = false, bool addNumbers = false)
         {
             if (index < 0 || index >= PackIds.Length) throw new ArgumentOutOfRangeException("index");
             string temporary = Path.Combine(Path.GetTempPath(), "pubg-observer-" + Guid.NewGuid().ToString("N"));
@@ -42,7 +42,7 @@ namespace PubgObserver
                             using (var output = new FileStream(path, FileMode.CreateNew)) input.CopyTo(output);
                         }
                 }
-                return Install(temporary, target, fillWithEmojis);
+                return Install(temporary, target, fillWithEmojis, addNumbers);
             }
             finally
             {
@@ -77,7 +77,7 @@ namespace PubgObserver
                 CopyTree(dir, Path.Combine(destination, Path.GetFileName(dir)));
         }
 
-        public static string Install(string source, string target, bool fillWithEmojis = false)
+        public static string Install(string source, string target, bool fillWithEmojis = false, bool addNumbers = false)
         {
             source = Path.GetFullPath(source).TrimEnd(Path.DirectorySeparatorChar);
             target = Path.GetFullPath(target).TrimEnd(Path.DirectorySeparatorChar);
@@ -98,6 +98,7 @@ namespace PubgObserver
             {
                 CopyTree(source, staging);
                 if (fillWithEmojis) TeamCsv.FillMissing(staging);
+                if (addNumbers) TeamNumbers.Apply(staging);
             }
             catch (Exception ex) { throw new IOException(Language.Text("copyFailed") + staging, ex); }
             bool existed = Directory.Exists(target);
@@ -120,12 +121,13 @@ namespace PubgObserver
         private readonly Button install = new Button();
         private readonly CheckBox fill = new CheckBox();
         private readonly Label fillInfo = new Label();
+        private readonly CheckBox numbers = new CheckBox();
         private bool translating;
 
         public MainForm()
         {
-            Text = "PUBG Observer Installer 1.1.1";
-            ClientSize = new Size(700, 630);
+            Text = "PUBG Observer Installer 1.2.0";
+            ClientSize = new Size(700, 700);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             AutoScaleMode = AutoScaleMode.Dpi;
@@ -143,9 +145,9 @@ namespace PubgObserver
                 e.Graphics.ScaleTransform(scale, scale);
                 using (var brush = new SolidBrush(headerColor)) e.Graphics.FillRectangle(brush, 0, 0, 700, 136);
                 using (var accent = new SolidBrush(Color.FromArgb(255, 207, 51))) e.Graphics.FillRectangle(accent, 32, 0, 56, 4);
-                DrawCard(e.Graphics, new Rectangle(32, 156, 636, 222));
-                DrawCard(e.Graphics, new Rectangle(32, 398, 636, 142));
-                using (var line = new Pen(Color.FromArgb(218, 224, 233))) e.Graphics.DrawLine(line, 32, 568, 668, 568);
+                DrawCard(e.Graphics, new Rectangle(32, 156, 636, 292));
+                DrawCard(e.Graphics, new Rectangle(32, 468, 636, 142));
+                using (var line = new Pen(Color.FromArgb(218, 224, 233))) e.Graphics.DrawLine(line, 32, 638, 668, 638);
             };
             var brand = new Label { Text = "PUBG  /  OBSERVER TOOLS", Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(255, 207, 51), BackColor = headerColor, Location = new Point(32, 21), Size = new Size(620, 20) };
             var title = new Label { Font = new Font("Segoe UI", 22, FontStyle.Bold), ForeColor = Color.White, BackColor = headerColor, AutoSize = true, Location = new Point(28, 43) };
@@ -188,9 +190,15 @@ namespace PubgObserver
             fillInfo.BackColor = Color.White;
             fillInfo.ForeColor = muted;
             fillInfo.Font = new Font("Segoe UI", 9);
+            numbers.Name = "AddNumbers";
+            numbers.Checked = true;
+            numbers.SetBounds(52, 376, 596, 28);
+            numbers.BackColor = Color.White;
+            numbers.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            var numberInfo = new Label { Location = new Point(52, 408), Size = new Size(596, 30), BackColor = Color.White, ForeColor = muted, Font = new Font("Segoe UI", 9) };
             packs.SelectedIndex = 0;
-            var target = new Label { Location = new Point(52, 418), Size = new Size(380, 108), BackColor = Color.White, Font = new Font("Segoe UI", 9), ForeColor = muted };
-            install.SetBounds(460, 442, 188, 48);
+            var target = new Label { Location = new Point(52, 488), Size = new Size(380, 108), BackColor = Color.White, Font = new Font("Segoe UI", 9), ForeColor = muted };
+            install.SetBounds(460, 512, 188, 48);
             install.BackColor = headerColor;
             install.ForeColor = Color.White;
             install.Font = new Font("Segoe UI", 11, FontStyle.Bold);
@@ -199,14 +207,14 @@ namespace PubgObserver
             install.FlatAppearance.MouseOverBackColor = Color.FromArgb(44, 61, 84);
             install.Cursor = Cursors.Hand;
             install.Click += InstallClick;
-            status.SetBounds(32, 543, 636, 24);
+            status.SetBounds(32, 613, 636, 24);
             status.Font = new Font("Segoe UI", 9);
-            Controls.AddRange(new Control[] { brand, title, intro, packLabel, packs, coverage, source, browse, fill, fillInfo, target, install, status });
-            var languageLabel = new Label { Location = new Point(32, 590), Size = new Size(86, 25), ForeColor = muted, Font = new Font("Segoe UI", 9) };
-            var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(118, 584), Size = new Size(216, 30), FlatStyle = FlatStyle.Flat, BackColor = Color.White };
+            Controls.AddRange(new Control[] { brand, title, intro, packLabel, packs, coverage, source, browse, fill, fillInfo, numbers, numberInfo, target, install, status });
+            var languageLabel = new Label { Location = new Point(32, 660), Size = new Size(86, 25), ForeColor = muted, Font = new Font("Segoe UI", 9) };
+            var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(118, 654), Size = new Size(216, 30), FlatStyle = FlatStyle.Flat, BackColor = Color.White };
             languages.Items.AddRange(new[] { Language.Text("system"), "English", "Deutsch" });
             languages.SelectedIndex = 0;
-            var donate = new Button { Name = "Donate", Location = new Point(508, 578), Size = new Size(160, 45), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
+            var donate = new Button { Name = "Donate", Location = new Point(508, 648), Size = new Size(160, 45), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
             donate.FlatAppearance.BorderSize = 0;
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brand.BuyMeACoffee.png"))
             using (var graphic = Image.FromStream(stream)) donate.BackgroundImage = new Bitmap(graphic);
@@ -229,6 +237,8 @@ namespace PubgObserver
                     packLabel.Text = Language.Text("packLabel");
                     browse.Text = Language.Text("browse");
                     fill.Text = Language.Text("fill");
+                    numbers.Text = Language.Text("numbers");
+                    numberInfo.Text = Language.Text("numberInfo");
                     target.Text = Language.Text("target");
                     install.Text = Language.Text("install");
                     languageLabel.Text = Language.Text("language");
@@ -297,7 +307,7 @@ namespace PubgObserver
                 install.Enabled = false;
                 UseWaitCursor = true;
                 bool fillMissing = fill.Enabled && fill.Checked;
-                string backup = packs.SelectedIndex == 3 ? Installer.Install(source.Text, Installer.DefaultTarget, fillMissing) : Installer.InstallPack(packs.SelectedIndex, Installer.DefaultTarget, fillMissing);
+                string backup = packs.SelectedIndex == 3 ? Installer.Install(source.Text, Installer.DefaultTarget, fillMissing, numbers.Checked) : Installer.InstallPack(packs.SelectedIndex, Installer.DefaultTarget, fillMissing, numbers.Checked);
                 status.Text = Language.Text("success");
                 MessageBox.Show(this, Language.Text("installed") + (backup == null ? "" : "\n\n" + Language.Text("backup") + "\n" + backup), Language.Text("done"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

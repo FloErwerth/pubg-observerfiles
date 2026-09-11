@@ -95,10 +95,15 @@ namespace PubgObserver
                     table.Rows.Add(row);
                 }
             }
+            table.Write(csvPath);
+        }
+
+        public void Write(string csvPath)
+        {
             using (var writer = new StreamWriter(csvPath, false, new UTF8Encoding(false)))
             {
-                writer.WriteLine(String.Join(",", table.Headers.Select(Quote)));
-                foreach (var row in table.Rows) writer.WriteLine(String.Join(",", row.Select(Quote)));
+                writer.WriteLine(String.Join(",", Headers.Select(Quote)));
+                foreach (var row in Rows) writer.WriteLine(String.Join(",", row.Select(Quote)));
             }
         }
 

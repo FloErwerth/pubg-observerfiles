@@ -36,6 +36,16 @@ Alle drei Pakete sind direkt in der EXE enthalten. Es ist kein Internetzugang un
 
 Das Ziel ist `%LOCALAPPDATA%\TslGame\Saved\Observer`. Administratorrechte sind nicht erforderlich.
 
+## Gut lesbare Teamnummern
+
+Die Option **Gut lesbare Teamnummern hinzufügen** ist standardmäßig aktiv und kann für alle Pakete sowie eigene Observer-Ordner ausgeschaltet werden. Jedes in der CSV zugeordnete Bild erhält unten rechts seine Teamnummer in weißer, kräftiger Schrift auf einer dunklen Fläche. Dafür werden eigene PNG-Dateien mit 128 × 128 Pixeln erzeugt; die Originalbilder bleiben erhalten. Das Seitenverhältnis des Motivs bleibt bestehen.
+
+Die Nummerierung wird nach der optionalen Emoji-Ergänzung angewendet, sodass auch aufgefüllte Teams ihre passende Zahl bekommen. Beim Ausschalten und erneuten Installieren eines enthaltenen Pakets werden wieder dessen Originalbilder verwendet. Bereits in Originalbildern enthaltene Nummern werden dadurch nicht entfernt.
+
+![Nummerierung in großer Ansicht sowie mit 32 und 24 Pixeln](docs/images/numbered-preview.png)
+
+Die Vorschau prüft die Lesbarkeit bei kleinen Bildgrößen; die konkrete Skalierung im aktuellen PUBG-Client wurde noch nicht im Spiel getestet.
+
 ## Fehlende Zuordnungen mit Emojis auffüllen
 
 Die Checkbox erscheint, wenn die ausgewählte CSV nicht alle Teamnummern 1 bis 100 enthält. Sie ist standardmäßig ausgeschaltet und wird beim Wechsel des Pakets zurückgesetzt. Die Prüfung funktioniert auch bei einem eigenen Observer-Ordner.

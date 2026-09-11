@@ -155,3 +155,39 @@ try {
     if ([PubgObserver.Language]::Current -ne [PubgObserver.Language]::SystemLanguage) { throw 'Rueckkehr zur Systemsprache fehlgeschlagen.' }
 } finally { $form.Dispose() }
 Write-Output 'Deutsch, Englisch, System-Fallback, Umlaute, Auswahl-Erhalt und Buy-Me-a-Coffee-Button erfolgreich geprueft.'
+
+foreach ($i in @(0, 1, 2)) {
+    $numbered = Join-Path $root "numbered-$i\Observer"
+    [PubgObserver.Installer]::InstallPack($i, $numbered, $true, $true) | Out-Null
+    $rows = @(Import-Csv -LiteralPath (Join-Path $numbered 'TeamInfo.csv'))
+    if ($rows.Count -ne 100) { throw 'Nummerierung nach Emoji-Ergaenzung unvollstaendig.' }
+    foreach ($row in $rows) {
+        if ($row.ImageFileName -ne ('observer-numbered-' + $row.TeamNumber + '.png')) { throw 'Nummer und CSV-Zuordnung stimmen nicht ueberein.' }
+        $bitmap = New-Object Drawing.Bitmap((Join-Path $numbered ('TeamIcon\' + $row.ImageFileName)))
+        try {
+            if ($bitmap.Width -ne 128 -or $bitmap.Height -ne 128) { throw 'Falsche Icon-Abmessung.' }
+            if ($bitmap.GetPixel(127,127).ToArgb() -ne [Drawing.Color]::FromArgb(255,17,24,39).ToArgb()) { throw 'Kontrastflaeche fehlt.' }
+            $white = 0
+            for ($y = 66; $y -lt 128; $y++) { for ($x = 54; $x -lt 128; $x++) { $pixel=$bitmap.GetPixel($x,$y); if ($pixel.R -gt 240 -and $pixel.G -gt 240 -and $pixel.B -gt 240) { $white++ } } }
+            if ($white -lt 40) { throw 'Nummer ist leer oder zu klein.' }
+        } finally { $bitmap.Dispose() }
+    }
+    $original = Join-Path $root "embedded-$i\Observer"
+    foreach ($file in (Get-ChildItem -LiteralPath (Join-Path $original 'TeamIcon') -File)) {
+        if ((Get-FileHash -LiteralPath $file.FullName).Hash -ne (Get-FileHash -LiteralPath (Join-Path $numbered ('TeamIcon\' + $file.Name))).Hash) { throw 'Originalbild wurde ueberschrieben.' }
+    }
+}
+# One shared source image must produce different files for different teams.
+[IO.File]::WriteAllText((Join-Path $custom 'TeamInfo.csv'), $customCsv)
+$customNumbered = Join-Path $root 'custom-numbered\Observer'
+[PubgObserver.Installer]::Install($custom, $customNumbered, $false, $true) | Out-Null
+if ((Get-FileHash -LiteralPath (Join-Path $customNumbered 'TeamIcon\observer-numbered-1.png')).Hash -eq (Get-FileHash -LiteralPath (Join-Path $customNumbered 'TeamIcon\observer-numbered-3.png')).Hash) { throw 'Geteiltes Bild erhielt dieselbe Nummer.' }
+$form = New-Object PubgObserver.MainForm
+try {
+    if (-not $form.Controls['AddNumbers'].Checked) { throw 'Nummerierung nicht standardmaessig aktiv.' }
+    $form.Controls['AddNumbers'].Checked = $false
+    $form.Controls['LanguageSelection'].SelectedIndex = 1
+    $form.Controls['PackSelection'].SelectedIndex = 1
+    if ($form.Controls['AddNumbers'].Checked) { throw 'Ausgeschaltete Nummerierung beim Wechsel verloren.' }
+} finally { $form.Dispose() }
+Write-Output 'Nummerierung aller 300 Team-Zuordnungen, Originalschutz, geteilte Bilder und Checkbox erfolgreich geprueft.'

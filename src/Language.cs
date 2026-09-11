@@ -30,6 +30,8 @@ namespace PubgObserver
             {"browse", new[] {"Browse…", "Auswählen…"}},
             {"folder", new[] {"Select the Observer folder containing TeamInfo.csv and TeamIcon.", "Observer-Ordner mit TeamInfo.csv und TeamIcon auswählen."}},
             {"fill", new[] {"Fill missing assignments with emojis", "Fehlende Zuordnungen mit Emojis auffüllen"}},
+            {"numbers", new[] {"Add readable team numbers", "Gut lesbare Teamnummern hinzufügen"}},
+            {"numberInfo", new[] {"White numbers on a dark badge. Disable to use the original images.", "Weiße Zahlen auf dunklem Hintergrund. Ausgeschaltet: Originalbilder."}},
             {"missing", new[] {"{0} missing team numbers up to 100 can be added.", "{0} fehlende Teamnummern bis 100 können ergänzt werden."}},
             {"complete", new[] {"All teams 1-100 are assigned.", "Alle Teams 1-100 sind zugeordnet."}},
             {"csvCheck", new[] {"Could not check the CSV: ", "CSV konnte nicht geprüft werden: "}},
