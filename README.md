@@ -16,6 +16,10 @@ Observer-Dateien für PUBG mit wenigen Klicks installieren: Paket wählen, **Ins
 
 Beide Pakete sind direkt in der EXE enthalten. Nummern werden über die standardmäßig aktive Option hinzugefügt; ein separates Paket mit fest eingebrannten Nummern ist nicht mehr enthalten. Es ist kein Internetzugang und kein Google-Drive-Login erforderlich.
 
+Ab Version 1.2.2 haben alle 25 Flaggen eine einheitliche Fläche von **192 × 128 Pixeln (3:2)**. Dafür werden ihre ursprünglichen Seitenverhältnisse angeglichen, ohne Motive abzuschneiden. Hochwertige Skalierung und moderate Nachschärfung verbessern die Darstellung; fehlende Details kleiner Quelldateien lassen sich dadurch nicht wiederherstellen. Die Originale liegen unter `assets/flags-source`.
+
+![Alle Flaggen vor und nach der Optimierung sowie mit Nummern](docs/images/flags-preview.png)
+
 <details>
 <summary>Weitere Ansichten</summary>
 
@@ -41,6 +45,8 @@ Die Option **Nummern hinzufügen** ist standardmäßig aktiv und kann für alle 
 
 Die Nummerierung wird nach der optionalen Emoji-Ergänzung angewendet, sodass auch aufgefüllte Teams ihre passende Zahl bekommen. Beim Ausschalten und erneuten Installieren eines enthaltenen Pakets werden wieder dessen Originalbilder verwendet. Bereits in Originalbildern enthaltene Nummern werden dadurch nicht entfernt.
 
+Ab Version 1.2.3 sind die Zahlen etwa 20 Prozent größer; dreistellige Teamnummern erhalten entsprechend mehr Platz in der Breite.
+
 ![Nummerierung in großer Ansicht sowie mit 32 und 24 Pixeln](docs/images/numbered-preview.png)
 
 Die Vorschau prüft die Lesbarkeit bei kleinen Bildgrößen; die konkrete Skalierung im aktuellen PUBG-Client wurde noch nicht im Spiel getestet.
@@ -53,9 +59,13 @@ Die Checkbox erscheint, wenn die ausgewählte CSV nicht alle Teamnummern 1 bis 1
 - Emojis: bereits vollständig, deshalb keine Checkbox.
 - Eigene CSV: auch Lücken mitten in der Teamnummernfolge werden ergänzt.
 
+Das Emoji-Paket liefert seit Version 1.2.3 für jedes Team einen vollständigen RGBA-Farbwert (`ffffffff`). Dadurch enden ergänzte CSV-Zeilen nicht mehr mit einem leeren `TeamColor`-Feld. Dies adressiert eine mögliche Ursache für nicht angezeigte Ergänzungen wie Team 26; die Bestätigung im Spiel steht aus.
+
 Vorhandene Teamnamen, Bildzuordnungen und Bilder bleiben erhalten. Ergänzt wird jeweils das Emoji derselben Teamnummer aus dem enthaltenen Emoji-Paket. Neue Bilder erhalten eigene Dateinamen, sodass vorhandene Dateien nicht überschrieben werden. Es wird ausschliesslich die Installationskopie bearbeitet, nicht der ausgewählte Quellordner. Ein vorhandener CSV-Eintrag mit fehlendem Bild wird durch diese Option nicht ersetzt.
 
 Eigene CSV-Dateien muessen kommasepariert sein und eindeutige Teamnummern sowie die Spalten `TeamNumber` und `ImageFileName` enthalten. Anführungszeichen in CSV-Feldern werden unterstützt. Fuer die CSV-Prüfung werden UTF-8 sowie BOM-markierte Unicode-Dateien unterstützt. Fehler beim Auffuellen lassen eine bisherige Installation unverändert.
+
+Seit Version 1.2.2 bleiben Spaltennamen und einfache CSV-Werte auch bei Nummerierung und Emoji-Ergänzung ohne Anführungszeichen. Die vorherige Ausgabe setzte sämtliche Felder in Anführungszeichen und steht im Zusammenhang mit dem gemeldeten Ladefehler. Eigene Werte mit Kommas, Anführungszeichen oder Zeilenumbrüchen werden weiterhin korrekt als CSV maskiert; deren Unterstützung durch PUBG wurde nicht bestätigt.
 
 ## Sprache und Unterstützung
 
@@ -92,8 +102,11 @@ In Windows PowerShell oder PowerShell 7:
 ```powershell
 .\build.ps1
 .\tests\smoke.ps1
+.\tests\observer-compatibility.ps1
 .\scripts\render-ui.ps1
 ```
+
+Die Flaggen lassen sich mit `scripts/optimize-flags.ps1` erneut aus den Originalen erzeugen. Danach neu bauen; `scripts/preview-flags.ps1 -InstallerPath <EXE>` erzeugt die Vergleichsansicht einschließlich nummerierter Icons bei 32 Pixeln.
 
 Der Build nutzt den .NET-Framework-Compiler von Windows. Die Ausgabe liegt unter `dist/`; nur EXE und `SHA256SUMS.txt` werden für den Release benötigt. Die ZIP-Dateien sind Zwischenprodukte. `-OutputDirectory` erlaubt einen separaten Build-Ordner, falls eine bereits gestartete EXE die Standardausgabe sperrt. Test- und Render-Skript akzeptieren dazu `-InstallerPath`.
 

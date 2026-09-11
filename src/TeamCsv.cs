@@ -109,6 +109,9 @@ namespace PubgObserver
 
         private static string Quote(string field)
         {
+            // Keep PUBG's plain headers, numeric IDs and filenames unchanged.
+            // Only custom values containing CSV delimiters need escaping.
+            if (field.IndexOfAny(new[] { ',', '"', '\r', '\n' }) < 0) return field;
             return "\"" + field.Replace("\"", "\"\"") + "\"";
         }
     }

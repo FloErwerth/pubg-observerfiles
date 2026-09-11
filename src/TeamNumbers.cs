@@ -28,9 +28,9 @@ namespace PubgObserver
                 using (var path = new GraphicsPath())
                 using (var family = new FontFamily("Arial"))
                 {
-                    path.AddString(text, family, (int)FontStyle.Bold, 60, Point.Empty, StringFormat.GenericTypographic);
+                    path.AddString(text, family, (int)FontStyle.Bold, 72, Point.Empty, StringFormat.GenericTypographic);
                     var bounds = path.GetBounds();
-                    float textScale = Math.Min(1f, 98f / bounds.Width);
+                    float textScale = Math.Min(1f, 114f / bounds.Width);
                     using (var transform = new Matrix())
                     {
                         transform.Translate(-bounds.X, -bounds.Y);

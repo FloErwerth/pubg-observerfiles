@@ -9,8 +9,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("PUBG Observer Installer")]
 [assembly: AssemblyDescription("Installiert lokale Observer-Pakete fuer PUBG")]
-[assembly: AssemblyVersion("1.2.1.0")]
-[assembly: AssemblyFileVersion("1.2.1.0")]
+[assembly: AssemblyVersion("1.2.3.0")]
+[assembly: AssemblyFileVersion("1.2.3.0")]
 
 namespace PubgObserver
 {
@@ -124,7 +124,7 @@ namespace PubgObserver
 
         public MainForm()
         {
-            Text = "PUBG Observer Installer 1.2.1";
+            Text = "PUBG Observer Installer 1.2.3";
             ClientSize = new Size(700, 550);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;

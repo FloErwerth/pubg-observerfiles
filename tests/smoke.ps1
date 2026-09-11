@@ -52,7 +52,10 @@ for ($i = 0; $i -lt [PubgObserver.Installer]::PackIds.Length; $i++) {
     foreach ($row in $rows) {
         if (-not (Test-Path -LiteralPath (Join-Path $packTarget ('TeamIcon\' + $row.ImageFileName)))) { throw "Paket verweist auf fehlendes Icon: $($row.ImageFileName)" }
         $img = [Drawing.Image]::FromFile((Join-Path $packTarget ('TeamIcon\' + $row.ImageFileName)))
-        try { if ($img.Width -lt 1 -or $img.Height -lt 1) { throw 'Ungueltiges Bild.' } } finally { $img.Dispose() }
+        try {
+            if ($img.Width -lt 1 -or $img.Height -lt 1) { throw 'Ungueltiges Bild.' }
+            if ($i -eq 0 -and ($img.Width -ne 192 -or $img.Height -ne 128)) { throw 'Flaggen haben keine einheitliche 3:2-Flaeche.' }
+        } finally { $img.Dispose() }
     }
 }
 $form = New-Object PubgObserver.MainForm
@@ -60,6 +63,19 @@ if ($form.Controls['PackSelection'].SelectedIndex -ne 0) { throw 'Standardpaket 
 $form.Controls['PackSelection'].SelectedIndex = 0
 $form.Dispose()
 Write-Output 'Beide eingebetteten Pakete bytegenau geprueft; Flaggen sind vorausgewaehlt.'
+
+# PUBG needs the original plain column names and simple values. Import-Csv
+# accepts quoted fields, so parsing alone cannot catch this regression.
+foreach ($pack in @(0, 1)) {
+    foreach ($options in @(@($false, $true), @($true, $false), @($true, $true))) {
+        $csvTarget = Join-Path $root ('csv-format-' + $pack + '-' + $options[0] + '-' + $options[1])
+        [PubgObserver.Installer]::InstallPack($pack, $csvTarget, $options[0], $options[1]) | Out-Null
+        $lines = [IO.File]::ReadAllLines((Join-Path $csvTarget 'TeamInfo.csv'))
+        if ($lines[0] -ne 'TeamNumber,TeamName,TeamShortName,ImageFileName,TeamColor') { throw 'PUBG-CSV: Spaltennamen wurden veraendert oder in Anfuehrungszeichen gesetzt.' }
+        if ($lines | Where-Object { $_.Contains('"') }) { throw 'PUBG-CSV: Einfache Paketwerte wurden in Anfuehrungszeichen gesetzt.' }
+    }
+}
+Write-Output 'CSV-Rohformat fuer beide Pakete mit Nummerierung und Emoji-Ergaenzung geprueft.'
 
 # Fill only missing team IDs; existing rows and image bytes must survive unchanged.
 foreach ($i in @(0, 1)) {
@@ -192,7 +208,7 @@ Write-Output 'Nummerierung aller 200 Team-Zuordnungen, Originalschutz, geteilte 
 $transparent = New-Object Drawing.Bitmap(128,128)
 $outlined = [PubgObserver.TeamNumbers]::Render($transparent,100)
 try {
-    if ($outlined.GetPixel(60,70).A -ne 0 -or $outlined.GetPixel(127,127).A -ne 0) { throw 'Nummern duerfen keine Hintergrundflaeche erzeugen.' }
+    if ($outlined.GetPixel(60,32).A -ne 0 -or $outlined.GetPixel(127,127).A -ne 0) { throw 'Nummern duerfen keine Hintergrundflaeche erzeugen.' }
     $black = 0; $white = 0
     for ($y=0; $y -lt 128; $y++) { for ($x=0; $x -lt 128; $x++) {
         $p=$outlined.GetPixel($x,$y)
