@@ -9,8 +9,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("PUBG Observer Installer")]
 [assembly: AssemblyDescription("Installiert lokale Observer-Pakete fuer PUBG")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.1.0")]
+[assembly: AssemblyFileVersion("1.2.1.0")]
 
 namespace PubgObserver
 {
@@ -18,7 +18,6 @@ namespace PubgObserver
     {
         public static readonly string[] PackIds = { "flags", "emojis" };
         public static string[] PackNames { get { return new[] { Language.Text("plain"), Language.Text("emojis") }; } }
-        public static string[] PackCoverage { get { return new[] { Language.Text("coverage25"), Language.Text("coverage100") }; } }
 
         public static string InstallPack(int index, string target, bool fillWithEmojis = false, bool addNumbers = false)
         {
@@ -120,14 +119,13 @@ namespace PubgObserver
         private readonly Label status = new Label();
         private readonly Button install = new Button();
         private readonly CheckBox fill = new CheckBox();
-        private readonly Label fillInfo = new Label();
         private readonly CheckBox numbers = new CheckBox();
         private bool translating;
 
         public MainForm()
         {
-            Text = "PUBG Observer Installer 1.2.0";
-            ClientSize = new Size(700, 700);
+            Text = "PUBG Observer Installer 1.2.1";
+            ClientSize = new Size(700, 550);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             AutoScaleMode = AutoScaleMode.Dpi;
@@ -143,62 +141,53 @@ namespace PubgObserver
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 float scale = ClientSize.Width / 700f;
                 e.Graphics.ScaleTransform(scale, scale);
-                using (var brush = new SolidBrush(headerColor)) e.Graphics.FillRectangle(brush, 0, 0, 700, 136);
+                using (var brush = new SolidBrush(headerColor)) e.Graphics.FillRectangle(brush, 0, 0, 700, 104);
                 using (var accent = new SolidBrush(Color.FromArgb(255, 207, 51))) e.Graphics.FillRectangle(accent, 32, 0, 56, 4);
-                DrawCard(e.Graphics, new Rectangle(32, 156, 636, 292));
-                DrawCard(e.Graphics, new Rectangle(32, 468, 636, 142));
-                using (var line = new Pen(Color.FromArgb(218, 224, 233))) e.Graphics.DrawLine(line, 32, 638, 668, 638);
+                DrawCard(e.Graphics, new Rectangle(32, 124, 636, 228));
+                DrawCard(e.Graphics, new Rectangle(32, 372, 636, 88));
+                using (var line = new Pen(Color.FromArgb(218, 224, 233))) e.Graphics.DrawLine(line, 32, 488, 668, 488);
             };
             var brand = new Label { Text = "PUBG  /  OBSERVER TOOLS", Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(255, 207, 51), BackColor = headerColor, Location = new Point(32, 21), Size = new Size(620, 20) };
             var title = new Label { Font = new Font("Segoe UI", 22, FontStyle.Bold), ForeColor = Color.White, BackColor = headerColor, AutoSize = true, Location = new Point(28, 43) };
-            var intro = new Label { ForeColor = Color.FromArgb(192, 202, 216), BackColor = headerColor, Location = new Point(32, 90), Size = new Size(636, 38), Font = new Font("Segoe UI", 9) };
-            var packLabel = new Label { Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = muted, BackColor = Color.White, Location = new Point(52, 174), Size = new Size(580, 22) };
+            var packLabel = new Label { Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = muted, BackColor = Color.White, Location = new Point(52, 142), Size = new Size(580, 22) };
             packs.Name = "PackSelection";
             packs.DropDownStyle = ComboBoxStyle.DropDownList;
-            packs.SetBounds(52, 204, 596, 32);
+            packs.SetBounds(52, 172, 596, 32);
             packs.Font = new Font("Segoe UI", 11);
             packs.FlatStyle = FlatStyle.Flat;
             packs.BackColor = Color.FromArgb(246, 248, 251);
             packs.Items.AddRange(Installer.PackNames);
             packs.Items.Add(Language.Text("custom"));
-            source.SetBounds(52, 248, 464, 30);
+            source.SetBounds(52, 216, 464, 30);
             source.ReadOnly = true;
             source.Name = "SourceFolder";
             source.TextChanged += delegate { UpdateFillOption(); };
-            var browse = new Button { Location = new Point(528, 246), Size = new Size(120, 32), FlatStyle = FlatStyle.Flat, BackColor = Color.White, Cursor = Cursors.Hand };
+            var browse = new Button { Location = new Point(528, 214), Size = new Size(120, 32), FlatStyle = FlatStyle.Flat, BackColor = Color.White, Cursor = Cursors.Hand };
             browse.FlatAppearance.BorderColor = Color.FromArgb(207, 215, 226);
             browse.Click += delegate
             {
                 using (var dialog = new FolderBrowserDialog { Description = Language.Text("folder"), ShowNewFolderButton = false })
                     if (dialog.ShowDialog(this) == DialogResult.OK) source.Text = dialog.SelectedPath;
             };
-            var coverage = new Label { Name = "PackCoverage", Location = new Point(52, 246), Size = new Size(596, 42), BackColor = Color.White, ForeColor = muted, Font = new Font("Segoe UI", 9) };
             packs.SelectedIndexChanged += delegate
             {
                 if (translating) return;
                 bool custom = packs.SelectedIndex == Installer.PackIds.Length;
                 source.Visible = browse.Visible = custom;
-                coverage.Visible = !custom;
-                coverage.Text = custom || packs.SelectedIndex < 0 ? "" : Installer.PackCoverage[packs.SelectedIndex];
                 UpdateFillOption();
             };
             fill.Name = "FillMissing";
-            fill.SetBounds(52, 302, 596, 28);
+            fill.SetBounds(52, 258, 596, 28);
             fill.BackColor = Color.White;
             fill.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            fillInfo.SetBounds(52, 334, 596, 36);
-            fillInfo.BackColor = Color.White;
-            fillInfo.ForeColor = muted;
-            fillInfo.Font = new Font("Segoe UI", 9);
             numbers.Name = "AddNumbers";
             numbers.Checked = true;
-            numbers.SetBounds(52, 376, 596, 28);
+            numbers.SetBounds(52, 300, 596, 28);
             numbers.BackColor = Color.White;
             numbers.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            var numberInfo = new Label { Location = new Point(52, 408), Size = new Size(596, 30), BackColor = Color.White, ForeColor = muted, Font = new Font("Segoe UI", 9) };
             packs.SelectedIndex = 0;
-            var target = new Label { Location = new Point(52, 488), Size = new Size(380, 108), BackColor = Color.White, Font = new Font("Segoe UI", 9), ForeColor = muted };
-            install.SetBounds(460, 512, 188, 48);
+            var target = new Label { Location = new Point(52, 390), Size = new Size(380, 52), BackColor = Color.White, Font = new Font("Segoe UI", 9), ForeColor = muted };
+            install.SetBounds(460, 392, 188, 48);
             install.BackColor = headerColor;
             install.ForeColor = Color.White;
             install.Font = new Font("Segoe UI", 11, FontStyle.Bold);
@@ -207,14 +196,14 @@ namespace PubgObserver
             install.FlatAppearance.MouseOverBackColor = Color.FromArgb(44, 61, 84);
             install.Cursor = Cursors.Hand;
             install.Click += InstallClick;
-            status.SetBounds(32, 613, 636, 24);
+            status.SetBounds(32, 463, 636, 24);
             status.Font = new Font("Segoe UI", 9);
-            Controls.AddRange(new Control[] { brand, title, intro, packLabel, packs, coverage, source, browse, fill, fillInfo, numbers, numberInfo, target, install, status });
-            var languageLabel = new Label { Location = new Point(32, 660), Size = new Size(86, 25), ForeColor = muted, Font = new Font("Segoe UI", 9) };
-            var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(118, 654), Size = new Size(216, 30), FlatStyle = FlatStyle.Flat, BackColor = Color.White };
+            Controls.AddRange(new Control[] { brand, title, packLabel, packs, source, browse, fill, numbers, target, install, status });
+            var languageLabel = new Label { Location = new Point(32, 510), Size = new Size(86, 25), ForeColor = muted, Font = new Font("Segoe UI", 9) };
+            var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(118, 504), Size = new Size(216, 30), FlatStyle = FlatStyle.Flat, BackColor = Color.White };
             languages.Items.AddRange(new[] { Language.Text("system"), "English", "Deutsch" });
             languages.SelectedIndex = 0;
-            var donate = new Button { Name = "Donate", Location = new Point(508, 648), Size = new Size(160, 45), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
+            var donate = new Button { Name = "Donate", Location = new Point(508, 498), Size = new Size(160, 45), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
             donate.FlatAppearance.BorderSize = 0;
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brand.BuyMeACoffee.png"))
             using (var graphic = Image.FromStream(stream)) donate.BackgroundImage = new Bitmap(graphic);
@@ -233,12 +222,10 @@ namespace PubgObserver
                 try
                 {
                     title.Text = Language.Text("title");
-                    intro.Text = Language.Text("intro");
                     packLabel.Text = Language.Text("packLabel");
                     browse.Text = Language.Text("browse");
                     fill.Text = Language.Text("fill");
                     numbers.Text = Language.Text("numbers");
-                    numberInfo.Text = Language.Text("numberInfo");
                     target.Text = Language.Text("target");
                     install.Text = Language.Text("install");
                     languageLabel.Text = Language.Text("language");
@@ -248,7 +235,6 @@ namespace PubgObserver
                     packs.Items.AddRange(Installer.PackNames);
                     packs.Items.Add(Language.Text("custom"));
                     packs.SelectedIndex = selected;
-                    coverage.Text = selected < 0 || selected == Installer.PackIds.Length ? "" : Installer.PackCoverage[selected];
                     status.Text = "";
                     UpdateFillOption();
                     fill.Checked = fill.Enabled && wasChecked;
@@ -281,18 +267,20 @@ namespace PubgObserver
 
         private void UpdateFillOption()
         {
+            bool custom = packs.SelectedIndex == Installer.PackIds.Length;
+            fill.Top = custom ? 258 : 222;
+            numbers.Top = fill.Top + 42;
             fill.Checked = false;
             fill.Visible = false;
             fill.Enabled = false;
-            fillInfo.Text = "";
+            status.Text = "";
             try
             {
                 if (packs.SelectedIndex < 0 || (packs.SelectedIndex == Installer.PackIds.Length && String.IsNullOrWhiteSpace(source.Text))) return;
                 int missing = packs.SelectedIndex == Installer.PackIds.Length ? TeamCsv.MissingInFolder(source.Text) : TeamCsv.MissingInPack(packs.SelectedIndex);
                 fill.Visible = fill.Enabled = missing > 0;
-                fillInfo.Text = missing > 0 ? String.Format(Language.Text("missing"), missing) : Language.Text("complete");
             }
-            catch (Exception ex) { fillInfo.Text = Language.Text("csvCheck") + ex.Message; }
+            catch (Exception ex) { status.Text = Language.Text("csvCheck") + ex.Message; }
         }
 
         private void InstallClick(object sender, EventArgs args)

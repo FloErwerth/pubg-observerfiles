@@ -58,7 +58,6 @@ for ($i = 0; $i -lt [PubgObserver.Installer]::PackIds.Length; $i++) {
 $form = New-Object PubgObserver.MainForm
 if ($form.Controls['PackSelection'].SelectedIndex -ne 0) { throw 'Standardpaket falsch.' }
 $form.Controls['PackSelection'].SelectedIndex = 0
-if ($form.Controls['PackCoverage'].Text -notlike '*1-25*') { throw 'Abdeckung fuer Flaggen ohne Nummern fehlt.' }
 $form.Dispose()
 Write-Output 'Beide eingebetteten Pakete bytegenau geprueft; Flaggen sind vorausgewaehlt.'
 

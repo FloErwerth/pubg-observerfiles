@@ -37,7 +37,7 @@ Das Ziel ist `%LOCALAPPDATA%\TslGame\Saved\Observer`. Administratorrechte sind n
 
 ## Gut lesbare Teamnummern
 
-Die Option **Gut lesbare Teamnummern hinzufügen** ist standardmäßig aktiv und kann für alle Pakete sowie eigene Observer-Ordner ausgeschaltet werden. Jedes in der CSV zugeordnete Bild erhält unten rechts seine Teamnummer in weißer, kräftiger Schrift mit schwarzer Kontur, ohne zusätzliche Hintergrundfläche. Dafür werden eigene PNG-Dateien mit 128 × 128 Pixeln erzeugt; die Originalbilder bleiben erhalten. Das Seitenverhältnis des Motivs bleibt bestehen.
+Die Option **Nummern hinzufügen** ist standardmäßig aktiv und kann für alle Pakete sowie eigene Observer-Ordner ausgeschaltet werden. Jedes in der CSV zugeordnete Bild erhält unten rechts seine Teamnummer in weißer, kräftiger Schrift mit schwarzer Kontur, ohne zusätzliche Hintergrundfläche. Dafür werden eigene PNG-Dateien mit 128 × 128 Pixeln erzeugt; die Originalbilder bleiben erhalten. Das Seitenverhältnis des Motivs bleibt bestehen.
 
 Die Nummerierung wird nach der optionalen Emoji-Ergänzung angewendet, sodass auch aufgefüllte Teams ihre passende Zahl bekommen. Beim Ausschalten und erneuten Installieren eines enthaltenen Pakets werden wieder dessen Originalbilder verwendet. Bereits in Originalbildern enthaltene Nummern werden dadurch nicht entfernt.
 
