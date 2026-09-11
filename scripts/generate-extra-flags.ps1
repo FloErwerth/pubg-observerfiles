@@ -1,7 +1,7 @@
 # Generate the two simple tricolours from geometric bands, without external artwork.
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
-$output = Join-Path $PSScriptRoot '..\packages\flags\Observer\TeamIcon'
+$output = Join-Path $PSScriptRoot '..\assets\flags-source'
 $flags = @(
     @{ Name = 'ITA'; Vertical = $true; Colors = @('#009246', '#FFFFFF', '#CE2B37') },
     @{ Name = 'NED'; Vertical = $false; Colors = @('#AE1C28', '#FFFFFF', '#21468B') }
@@ -24,4 +24,4 @@ foreach ($flag in $flags) {
         $bitmap.Save((Join-Path $output ($flag.Name + '.png')), [Drawing.Imaging.ImageFormat]::Png)
     } finally { $graphics.Dispose(); $bitmap.Dispose() }
 }
-Write-Output 'ITA.png und NED.png erzeugt: 300 x 200 Pixel, ohne Nummern.'
+Write-Output 'ITA.png und NED.png als Originale erzeugt: 300 x 200 Pixel, ohne Nummern. Anschliessend optimize-flags.ps1 ausfuehren.'
