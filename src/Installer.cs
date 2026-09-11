@@ -8,8 +8,8 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("PUBG Observer Installer")]
 [assembly: AssemblyDescription("Installiert lokale Observer-Pakete fuer PUBG")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.1.0")]
+[assembly: AssemblyFileVersion("1.1.1.0")]
 
 namespace PubgObserver
 {
@@ -123,7 +123,7 @@ namespace PubgObserver
 
         public MainForm()
         {
-            Text = "PUBG Observer Installer 1.1.0";
+            Text = "PUBG Observer Installer 1.1.1";
             ClientSize = new Size(640, 570);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
@@ -171,11 +171,15 @@ namespace PubgObserver
             var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(150, 522), Size = new Size(240, 30) };
             languages.Items.AddRange(new[] { Language.Text("system"), "English", "Deutsch" });
             languages.SelectedIndex = 0;
-            var donate = new Button { Name = "Donate", Location = new Point(414, 520), Size = new Size(200, 32), Tag = "https://paypal.me/ErwerthFlorian" };
+            var donate = new Button { Name = "Donate", Location = new Point(414, 508), Size = new Size(200, 56), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
+            donate.FlatAppearance.BorderSize = 0;
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brand.BuyMeACoffee.png"))
+            using (var graphic = Image.FromStream(stream)) donate.BackgroundImage = new Bitmap(graphic);
+            donate.Disposed += delegate { donate.BackgroundImage.Dispose(); };
             donate.Click += delegate
             {
                 try { Process.Start(new ProcessStartInfo((string)donate.Tag) { UseShellExecute = true }); }
-                catch (Exception) { MessageBox.Show(this, Language.Text("browserError"), "PayPal", MessageBoxButtons.OK, MessageBoxIcon.Information); }
+                catch (Exception) { MessageBox.Show(this, Language.Text("browserError"), "Buy Me a Coffee", MessageBoxButtons.OK, MessageBoxIcon.Information); }
             };
             Controls.AddRange(new Control[] { languageLabel, languages, donate });
             Action applyLanguage = delegate
@@ -192,7 +196,7 @@ namespace PubgObserver
                     target.Text = Language.Text("target");
                     install.Text = Language.Text("install");
                     languageLabel.Text = Language.Text("language");
-                    donate.Text = Language.Text("donate");
+                    donate.AccessibleName = Language.Text("donate");
                     languages.Items[0] = Language.Text("system");
                     packs.Items.Clear();
                     packs.Items.AddRange(Installer.PackNames);

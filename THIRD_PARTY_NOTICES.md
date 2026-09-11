@@ -1,5 +1,7 @@
 # Enthaltene Observer-Pakete
 
+Die offizielle Buy-Me-a-Coffee-Button-Grafik in `assets/buy-me-a-coffee.png` stammt unverändert vom [Buy-Me-a-Coffee-CDN](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png). Sie ist ein Markenasset eines Dritten und nicht von der MIT-Lizenz des Projekts erfasst; siehe [Brand Kit](https://buymeacoffee.com/brand).
+
 Die folgenden Pakete wurden vom Projektinhaber als lokale Downloads bereitgestellt. Die heruntergeladenen Bilder bleiben unveraendert. Seit Version 1.1.0 ersetzt das Paket "Flaggen ohne Nummern" das fruehere Nummern-Paket. Im neuen Paket wurden zwei CSV-Zeilen und geometrisch erzeugte Flaggen fuer Team 24 (Italien, ITA.png) und Team 25 (Niederlande, NED.png) ergaenzt. Das Erzeugungsskript liegt unter scripts/generate-extra-flags.ps1; fuer diese beiden neuen Projektgrafiken wird keine Fremdvorlage verwendet.
 
 | Paket | Urspruenglicher Ordner | Inhalt | Herkunft und Lizenz |

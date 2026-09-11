@@ -53,7 +53,9 @@ Eigene CSV-Dateien muessen kommasepariert sein und eindeutige Teamnummern sowie 
 
 Der Installer startet mit der Windows-Anzeigesprache. Deutsch wird für deutsche Systeme verwendet, Englisch für englische und andere nicht unterstützte Systemsprachen. Über **Sprache / Language** kannst du jederzeit **Systemsprache**, **English** oder **Deutsch** auswählen. Deutsche Texte enthalten echte Umlaute. Die Paketauswahl und die Emoji-Option bleiben beim Sprachwechsel erhalten.
 
-Der Button **Buy me a coffee** öffnet [PayPal.me/ErwerthFlorian](https://paypal.me/ErwerthFlorian) im Standardbrowser. Eine Unterstützung ist freiwillig und für keine Funktion erforderlich.
+Der offizielle **Buy Me a Coffee**-Button öffnet [buymeacoffee.com/forli69](https://buymeacoffee.com/forli69) im Standardbrowser. Eine Unterstützung ist freiwillig und für keine Funktion erforderlich.
+
+<a href="https://buymeacoffee.com/forli69"><img src="assets/buy-me-a-coffee.png" alt="Buy me a coffee" width="200" /></a>
 
 ![English interface](docs/images/installer-en.png)
 

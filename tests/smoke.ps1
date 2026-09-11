@@ -150,8 +150,8 @@ try {
     $form.Controls['LanguageSelection'].SelectedIndex = 1
     if ($form.Controls['FillMissing'].Text -ne 'Fill missing assignments with emojis') { throw 'Englische Uebersetzung fehlt.' }
     if ($form.Controls['PackSelection'].SelectedIndex -ne 2 -or -not $form.Controls['FillMissing'].Checked) { throw 'Sprachwechsel verliert die Auswahl.' }
-    if ($form.Controls['Donate'].Tag -ne 'https://paypal.me/ErwerthFlorian' -or $form.Controls['Donate'].Text -ne 'Buy me a coffee') { throw 'PayPal-Link falsch.' }
+    if ($form.Controls['Donate'].Tag -ne 'https://buymeacoffee.com/forli69' -or $form.Controls['Donate'].AccessibleName -ne 'Buy me a coffee' -or $null -eq $form.Controls['Donate'].BackgroundImage) { throw 'Buy-Me-a-Coffee-Button falsch.' }
     $form.Controls['LanguageSelection'].SelectedIndex = 0
     if ([PubgObserver.Language]::Current -ne [PubgObserver.Language]::SystemLanguage) { throw 'Rueckkehr zur Systemsprache fehlgeschlagen.' }
 } finally { $form.Dispose() }
-Write-Output 'Deutsch, Englisch, System-Fallback, Umlaute, Auswahl-Erhalt und PayPal-Link erfolgreich geprueft.'
+Write-Output 'Deutsch, Englisch, System-Fallback, Umlaute, Auswahl-Erhalt und Buy-Me-a-Coffee-Button erfolgreich geprueft.'

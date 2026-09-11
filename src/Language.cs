@@ -45,7 +45,7 @@ namespace PubgObserver
             {"language", new[] {"Language", "Sprache"}},
             {"system", new[] {"System language", "Systemsprache"}},
             {"donate", new[] {"Buy me a coffee", "Buy me a coffee"}},
-            {"browserError", new[] {"Could not open the browser. You can visit https://paypal.me/ErwerthFlorian manually.", "Der Browser konnte nicht geöffnet werden. Du kannst https://paypal.me/ErwerthFlorian manuell aufrufen."}},
+            {"browserError", new[] {"Could not open the browser. You can visit https://buymeacoffee.com/forli69 manually.", "Der Browser konnte nicht geöffnet werden. Du kannst https://buymeacoffee.com/forli69 manuell aufrufen."}},
             {"missingPack", new[] {"The selected pack is missing from this EXE.", "Das ausgewählte Paket fehlt in dieser EXE."}},
             {"badPath", new[] {"Invalid path in the pack.", "Ungültiger Pfad im Paket."}},
             {"linkedFolder", new[] {"Linked folders are not supported: ", "Verknüpfte Ordner werden nicht unterstützt: "}},
