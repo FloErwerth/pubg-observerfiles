@@ -1,0 +1,24 @@
+name: Windows build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build installer and checksum
+        shell: powershell
+        run: ./build.ps1
+      - name: Verify installation and embedded packages
+        shell: powershell
+        run: ./tests/smoke.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PUBG-Observer-Installer
+          path: |
+            dist/PUBG-Observer-Installer.exe
+            dist/SHA256SUMS.txt
