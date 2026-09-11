@@ -9,8 +9,22 @@ if ($ObserverPath -eq $defaultObserver -and (Get-Process TslGame -ErrorAction Si
     throw 'PUBG zuerst schliessen. Es wurden keine Dateien geaendert.'
 }
 $csv = Join-Path $ObserverPath 'TeamInfo.csv'
-$backup = Join-Path $ObserverPath 'TeamInfo.before-team29-test.txt'
-$expected = Join-Path $ObserverPath 'TeamInfo.team29-test.sha256'
+$hasher = [Security.Cryptography.SHA256]::Create()
+try { $key = [BitConverter]::ToString($hasher.ComputeHash([Text.Encoding]::UTF8.GetBytes($ObserverPath.TrimEnd('\').ToUpperInvariant()))).Replace('-','') }
+finally { $hasher.Dispose() }
+$stateDirectory = Join-Path $env:LOCALAPPDATA ('PUBG Observer Installer\' + $key + '\diagnostics')
+New-Item -ItemType Directory -Path $stateDirectory -Force | Out-Null
+$backup = Join-Path $stateDirectory 'TeamInfo.before-team29-test.txt'
+$expected = Join-Path $stateDirectory 'TeamInfo.team29-test.sha256'
+# Migrate the exact two artifacts created by previous versions, preserving their contents.
+foreach ($name in @('TeamInfo.before-team29-test.txt','TeamInfo.team29-test.sha256')) {
+    $legacy = Join-Path $ObserverPath $name
+    $destination = Join-Path $stateDirectory $name
+    if (Test-Path -LiteralPath $legacy) {
+        if (Test-Path -LiteralPath $destination) { throw 'Alte und neue Testsicherung vorhanden; keine Sicherung wird ueberschrieben.' }
+        Move-Item -LiteralPath $legacy -Destination $destination
+    }
+}
 if ($Mode -eq 'Restore') {
     if (-not (Test-Path -LiteralPath $backup) -or -not (Test-Path -LiteralPath $expected)) { throw 'Keine vollstaendige Testsicherung vorhanden.' }
     if ((Get-FileHash -LiteralPath $csv).Hash -ne ([IO.File]::ReadAllText($expected)).Trim()) { throw 'CSV wurde seit dem Test veraendert. Sicherung bleibt zur manuellen Wiederherstellung erhalten.' }

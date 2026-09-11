@@ -18,8 +18,19 @@ $backup = [PubgObserver.Installer]::Install($source, $target)
 if ($backup) { throw 'Erstinstallation darf kein Backup erzeugen.' }
 if (-not (Test-Path -LiteralPath (Join-Path $target 'TeamIcon\1.png'))) { throw 'Datei fehlt.' }
 Set-Content -LiteralPath (Join-Path $target 'old.txt') -Value 'preserve-me'
+$legacy = Join-Path (Split-Path $target -Parent) 'Observer-backup-20260911-123456-abcdef12'
+New-Item -ItemType Directory -Path $legacy | Out-Null
+Set-Content -LiteralPath (Join-Path $legacy 'saved.txt') -Value 'legacy-preserve'
+Set-Content -LiteralPath (Join-Path $target 'TeamInfo.before-team29-test.txt') -Value 'diagnostic-preserve'
 $backup = [PubgObserver.Installer]::Install($source, $target)
 if ((Get-Content -LiteralPath (Join-Path $backup 'old.txt')) -ne 'preserve-me') { throw 'Backup fehlerhaft.' }
+if ([IO.Path]::GetFullPath($backup).StartsWith([IO.Path]::GetFullPath((Split-Path $target -Parent)) + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Sicherung liegt im PUBG-Saved-Verzeichnis.' }
+$storage = [PubgObserver.Installer]::StorageDirectory($target)
+if (Test-Path -LiteralPath $legacy) { throw 'Alte Sicherung liegt noch im Spielverzeichnis.' }
+$archived = @(Get-ChildItem -LiteralPath $storage -Directory -Filter 'legacy-Observer-backup-*')
+if ($archived.Count -ne 1 -or (Get-Content (Join-Path $archived[0].FullName 'saved.txt')) -ne 'legacy-preserve') { throw 'Alte Sicherung nicht vollstaendig archiviert.' }
+if ((Get-Content (Join-Path $storage 'diagnostics\TeamInfo.before-team29-test.txt')) -ne 'diagnostic-preserve') { throw 'Diagnosesicherung verloren.' }
+if (@(Get-ChildItem -LiteralPath (Split-Path $target -Parent) -Directory -Filter 'Observer-*').Count -ne 0) { throw 'Installer-Artefakte im Spielverzeichnis.' }
 if (Test-Path -LiteralPath (Join-Path $target 'old.txt')) { throw 'Veraltete Datei im Ziel.' }
 $rejected = $false
 try { [PubgObserver.Installer]::Install($target, $target) } catch { $rejected = $true }

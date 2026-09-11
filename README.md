@@ -89,11 +89,11 @@ Get-FileHash .\PUBG-Observer-Installer.exe -Algorithm SHA256
 
 ## Sicherung und Rückgängigmachen
 
-Ein vorhandener `Observer`-Ordner wird vor dem Ersetzen als `Observer-backup-DATUM-ID` im gleichen Verzeichnis gesichert. Das neue Paket wird zuvor vollständig in einen Zwischenordner kopiert. Ein Paketwechsel ersetzt den gesamten Observer-Ordner.
+Ab Version 1.2.4 liegen Sicherungen und Zwischenordner unter `%LOCALAPPDATA%\PUBG Observer Installer\<Zielkennung>`, außerhalb von `TslGame`. Ein vorhandener `Observer`-Ordner wird dort als `Observer-backup-DATUM-ID` gesichert. Das neue Paket wird zuvor vollständig in einem externen Zwischenordner vorbereitet. Ein Paketwechsel ersetzt den gesamten Observer-Ordner. Der genaue Sicherungspfad erscheint nach der Installation.
 
-Zum Wiederherstellen PUBG und Installer schließen, unter `%LOCALAPPDATA%\TslGame\Saved` den aktuellen `Observer`-Ordner umbenennen und die gewünschte Sicherung wieder `Observer` nennen. Ohne vorherige Installation kann der neu angelegte Observer-Ordner nach Schliessen des Spiels entfernt werden.
+Zum Wiederherstellen PUBG und Installer schließen und im Installer die gewünschte Sicherung als eigenen Observer-Ordner auswählen. Nummerierung und Emoji-Ergänzung ausschalten, um die gesicherten Inhalte wieder zu übernehmen. Die bisherige Installation wird dabei ebenfalls extern gesichert.
 
-Backups werden nicht automatisch gelöscht. Nach einem Kopierfehler kann ein `Observer-staging-*`-Ordner zur manuellen Bereinigung verbleiben. Verknüpfte Quell- oder Zielordner werden abgelehnt.
+Backups werden nicht automatisch gelöscht. Alte `Observer-backup-*`- und `Observer-staging-*`-Ordner im bisherigen Namensformat werden bei der nächsten Installation nach außen verschoben. Die beiden Sicherungsdateien des Team-29-Testskripts liegen dort unter `diagnostics`; frühere Dateien im aktiven Observer-Ordner werden ebenfalls ausgelagert. Nach einem Kopierfehler kann ein externer Zwischenordner verbleiben, dessen Pfad die Fehlermeldung nennt. Verknüpfte Quell-, Ziel- oder Speicherordner werden abgelehnt. Ziel und Sicherungsablage müssen auf demselben Laufwerk liegen, damit Austausch und Rücknahme per Umbenennung erfolgen können; das gilt für das normale PUBG-Ziel automatisch.
 
 ## Entwicklung
 

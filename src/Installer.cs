@@ -5,12 +5,15 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 [assembly: AssemblyTitle("PUBG Observer Installer")]
 [assembly: AssemblyDescription("Installiert lokale Observer-Pakete fuer PUBG")]
-[assembly: AssemblyVersion("1.2.3.0")]
-[assembly: AssemblyFileVersion("1.2.3.0")]
+[assembly: AssemblyVersion("1.2.4.0")]
+[assembly: AssemblyFileVersion("1.2.4.0")]
 
 namespace PubgObserver
 {
@@ -76,6 +79,38 @@ namespace PubgObserver
                 CopyTree(dir, Path.Combine(destination, Path.GetFileName(dir)));
         }
 
+        public static string StorageDirectory(string target)
+        {
+            string normalized = Path.GetFullPath(target).TrimEnd(Path.DirectorySeparatorChar).ToUpperInvariant();
+            using (var hash = SHA256.Create())
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "PUBG Observer Installer", BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(normalized))).Replace("-", ""));
+        }
+
+        private static void ArchiveLegacyFiles(string target, string storage)
+        {
+            string parent = Path.GetDirectoryName(target);
+            foreach (string directory in Directory.GetDirectories(parent, "Observer-*"))
+            {
+                string name = Path.GetFileName(directory);
+                if (!Regex.IsMatch(name, @"^Observer-(backup|staging)-\d{8}-\d{6}-[0-9a-f]{8}$")) continue;
+                CheckLinks(directory);
+                Directory.Move(directory, Path.Combine(storage, "legacy-" + name + "-" + Guid.NewGuid().ToString("N")));
+            }
+            foreach (string name in new[] { "TeamInfo.before-team29-test.txt", "TeamInfo.team29-test.sha256" })
+            {
+                string file = Path.Combine(target, name);
+                if (!File.Exists(file)) continue;
+                if ((File.GetAttributes(file) & FileAttributes.ReparsePoint) != 0) throw new IOException(Language.Text("linkedFile") + file);
+                string diagnostics = Path.Combine(storage, "diagnostics");
+                CheckLinks(diagnostics);
+                Directory.CreateDirectory(diagnostics);
+                string archived = Path.Combine(diagnostics, name);
+                if (File.Exists(archived)) archived += "." + Guid.NewGuid().ToString("N");
+                File.Move(file, archived);
+            }
+        }
+
         public static string Install(string source, string target, bool fillWithEmojis = false, bool addNumbers = false)
         {
             source = Path.GetFullPath(source).TrimEnd(Path.DirectorySeparatorChar);
@@ -87,19 +122,42 @@ namespace PubgObserver
             if (!File.Exists(Path.Combine(source, "TeamInfo.csv")) || !Directory.Exists(Path.Combine(source, "TeamIcon")))
                 throw new IOException(Language.Text("folder"));
             CheckLinks(target);
+            if (target.Equals(DefaultTarget, StringComparison.OrdinalIgnoreCase))
+            {
+                var running = Process.GetProcessesByName("TslGame");
+                bool gameRunning = running.Length > 0;
+                foreach (var process in running) process.Dispose();
+                if (gameRunning) throw new IOException(Language.Text("running"));
+            }
             string parent = Path.GetDirectoryName(target);
+            string storage = StorageDirectory(target);
+            // Renames provide rollback without a partial copy into the active folder.
+            if (!Path.GetPathRoot(storage).Equals(Path.GetPathRoot(target), StringComparison.OrdinalIgnoreCase))
+                throw new IOException("Observer target and installer storage must be on the same drive.");
+            if (storage.StartsWith(parent + "\\", StringComparison.OrdinalIgnoreCase) ||
+                storage.StartsWith(source + "\\", StringComparison.OrdinalIgnoreCase) || source.Equals(storage, StringComparison.OrdinalIgnoreCase))
+                throw new IOException(Language.Text("overlap"));
+            CheckLinks(storage);
             Directory.CreateDirectory(parent);
+            Directory.CreateDirectory(storage);
             string suffix = DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8);
-            string staging = Path.Combine(parent, "Observer-staging-" + suffix);
-            string backup = Path.Combine(parent, "Observer-backup-" + suffix);
+            string staging = Path.Combine(storage, "Observer-staging-" + suffix);
+            string backup = Path.Combine(storage, "Observer-backup-" + suffix);
             // Copy completely before touching the existing installation.
             try
             {
                 CopyTree(source, staging);
                 if (fillWithEmojis) TeamCsv.FillMissing(staging);
                 if (addNumbers) TeamNumbers.Apply(staging);
+                // Diagnostic artifacts from older versions never enter the active package.
+                foreach (string name in new[] { "TeamInfo.before-team29-test.txt", "TeamInfo.team29-test.sha256" })
+                {
+                    string file = Path.Combine(staging, name);
+                    if (File.Exists(file)) File.Delete(file);
+                }
             }
             catch (Exception ex) { throw new IOException(Language.Text("copyFailed") + staging, ex); }
+            ArchiveLegacyFiles(target, storage);
             bool existed = Directory.Exists(target);
             if (existed) Directory.Move(target, backup);
             try { Directory.Move(staging, target); }
@@ -124,7 +182,7 @@ namespace PubgObserver
 
         public MainForm()
         {
-            Text = "PUBG Observer Installer 1.2.3";
+            Text = "PUBG Observer Installer 1.2.4";
             ClientSize = new Size(700, 550);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
