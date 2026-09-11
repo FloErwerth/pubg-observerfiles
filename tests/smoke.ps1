@@ -47,7 +47,7 @@ for ($i = 0; $i -lt 3; $i++) {
     }
     $csv = Get-ChildItem -LiteralPath $packTarget -Filter '*.csv'
     $rows = @(Import-Csv -LiteralPath $csv.FullName)
-    $expectedTeams = @(50, 100, 23)[$i]
+    $expectedTeams = @(50, 100, 25)[$i]
     if ((($rows.TeamNumber | ForEach-Object { [int]$_ } | Sort-Object) -join ',') -ne ((1..$expectedTeams) -join ',')) { throw 'Teamnummern fehlen oder sind doppelt.' }
     foreach ($row in $rows) {
         if (-not (Test-Path -LiteralPath (Join-Path $packTarget ('TeamIcon\' + $row.ImageFileName)))) { throw "Paket verweist auf fehlendes Icon: $($row.ImageFileName)" }
@@ -58,6 +58,6 @@ for ($i = 0; $i -lt 3; $i++) {
 $form = New-Object PubgObserver.MainForm
 if ($form.Controls['PackSelection'].SelectedIndex -ne 0) { throw 'Standardpaket falsch.' }
 $form.Controls['PackSelection'].SelectedIndex = 2
-if ($form.Controls['PackCoverage'].Text -notlike '*1-23*') { throw 'Abdeckung fuer Flaggen ohne Nummern fehlt.' }
+if ($form.Controls['PackCoverage'].Text -notlike '*1-25*') { throw 'Abdeckung fuer Flaggen ohne Nummern fehlt.' }
 $form.Dispose()
 Write-Output 'Alle drei eingebetteten Pakete bytegenau geprueft; Flaggen mit Nummern sind vorausgewaehlt.'

@@ -17,7 +17,7 @@ namespace PubgObserver
     {
         public static readonly string[] PackIds = { "flags-with-numbers", "emojis", "flags" };
         public static readonly string[] PackNames = { "Flaggen mit Nummern (Standard)", "Emojis", "Flaggen ohne Nummern" };
-        public static readonly string[] PackCoverage = { "Enthaelt Bilder fuer Teams 1-50.", "Enthaelt Bilder fuer Teams 1-100.", "Enthaelt Bilder fuer Teams 1-23. Ab Team 24 ist keine Flagge definiert." };
+        public static readonly string[] PackCoverage = { "Enthaelt Bilder fuer Teams 1-50.", "Enthaelt Bilder fuer Teams 1-100.", "Enthaelt Bilder fuer Teams 1-25. Ab Team 26 ist keine Flagge definiert." };
 
         public static string InstallPack(int index, string target)
         {
