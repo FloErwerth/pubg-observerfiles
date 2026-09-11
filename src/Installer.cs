@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
@@ -124,31 +125,52 @@ namespace PubgObserver
         public MainForm()
         {
             Text = "PUBG Observer Installer 1.1.1";
-            ClientSize = new Size(640, 570);
+            ClientSize = new Size(700, 630);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             AutoScaleMode = AutoScaleMode.Dpi;
             StartPosition = FormStartPosition.CenterScreen;
             Font = new Font("Segoe UI", 10);
-            BackColor = Color.FromArgb(245, 247, 250);
-            var title = new Label { Font = new Font("Segoe UI", 19, FontStyle.Bold), AutoSize = true, Location = new Point(24, 24) };
-            var intro = new Label { Location = new Point(26, 76), Size = new Size(590, 44) };
+            DoubleBuffered = true;
+            BackColor = Color.FromArgb(242, 244, 248);
+            ForeColor = Color.FromArgb(30, 41, 59);
+            var muted = Color.FromArgb(100, 116, 139);
+            var headerColor = Color.FromArgb(20, 29, 44);
+            Paint += delegate(object sender, PaintEventArgs e)
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                float scale = ClientSize.Width / 700f;
+                e.Graphics.ScaleTransform(scale, scale);
+                using (var brush = new SolidBrush(headerColor)) e.Graphics.FillRectangle(brush, 0, 0, 700, 136);
+                using (var accent = new SolidBrush(Color.FromArgb(255, 207, 51))) e.Graphics.FillRectangle(accent, 32, 0, 56, 4);
+                DrawCard(e.Graphics, new Rectangle(32, 156, 636, 222));
+                DrawCard(e.Graphics, new Rectangle(32, 398, 636, 142));
+                using (var line = new Pen(Color.FromArgb(218, 224, 233))) e.Graphics.DrawLine(line, 32, 568, 668, 568);
+            };
+            var brand = new Label { Text = "PUBG  /  OBSERVER TOOLS", Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(255, 207, 51), BackColor = headerColor, Location = new Point(32, 21), Size = new Size(620, 20) };
+            var title = new Label { Font = new Font("Segoe UI", 22, FontStyle.Bold), ForeColor = Color.White, BackColor = headerColor, AutoSize = true, Location = new Point(28, 43) };
+            var intro = new Label { ForeColor = Color.FromArgb(192, 202, 216), BackColor = headerColor, Location = new Point(32, 90), Size = new Size(636, 38), Font = new Font("Segoe UI", 9) };
+            var packLabel = new Label { Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = muted, BackColor = Color.White, Location = new Point(52, 174), Size = new Size(580, 22) };
             packs.Name = "PackSelection";
             packs.DropDownStyle = ComboBoxStyle.DropDownList;
-            packs.SetBounds(26, 132, 588, 30);
+            packs.SetBounds(52, 204, 596, 32);
+            packs.Font = new Font("Segoe UI", 11);
+            packs.FlatStyle = FlatStyle.Flat;
+            packs.BackColor = Color.FromArgb(246, 248, 251);
             packs.Items.AddRange(Installer.PackNames);
             packs.Items.Add(Language.Text("custom"));
-            source.SetBounds(26, 180, 453, 30);
+            source.SetBounds(52, 248, 464, 30);
             source.ReadOnly = true;
             source.Name = "SourceFolder";
             source.TextChanged += delegate { UpdateFillOption(); };
-            var browse = new Button { Location = new Point(489, 178), Size = new Size(125, 32) };
+            var browse = new Button { Location = new Point(528, 246), Size = new Size(120, 32), FlatStyle = FlatStyle.Flat, BackColor = Color.White, Cursor = Cursors.Hand };
+            browse.FlatAppearance.BorderColor = Color.FromArgb(207, 215, 226);
             browse.Click += delegate
             {
                 using (var dialog = new FolderBrowserDialog { Description = Language.Text("folder"), ShowNewFolderButton = false })
                     if (dialog.ShowDialog(this) == DialogResult.OK) source.Text = dialog.SelectedPath;
             };
-            var coverage = new Label { Name = "PackCoverage", Location = new Point(26, 180), Size = new Size(588, 44) };
+            var coverage = new Label { Name = "PackCoverage", Location = new Point(52, 246), Size = new Size(596, 42), BackColor = Color.White, ForeColor = muted, Font = new Font("Segoe UI", 9) };
             packs.SelectedIndexChanged += delegate
             {
                 if (translating) return;
@@ -159,19 +181,32 @@ namespace PubgObserver
                 UpdateFillOption();
             };
             fill.Name = "FillMissing";
-            fill.SetBounds(26, 228, 588, 28);
-            fillInfo.SetBounds(26, 260, 588, 38);
+            fill.SetBounds(52, 302, 596, 28);
+            fill.BackColor = Color.White;
+            fill.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            fillInfo.SetBounds(52, 334, 596, 36);
+            fillInfo.BackColor = Color.White;
+            fillInfo.ForeColor = muted;
+            fillInfo.Font = new Font("Segoe UI", 9);
             packs.SelectedIndex = 0;
-            var target = new Label { Location = new Point(26, 306), Size = new Size(588, 90) };
-            install.SetBounds(26, 405, 180, 40);
+            var target = new Label { Location = new Point(52, 418), Size = new Size(380, 108), BackColor = Color.White, Font = new Font("Segoe UI", 9), ForeColor = muted };
+            install.SetBounds(460, 442, 188, 48);
+            install.BackColor = headerColor;
+            install.ForeColor = Color.White;
+            install.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+            install.FlatStyle = FlatStyle.Flat;
+            install.FlatAppearance.BorderSize = 0;
+            install.FlatAppearance.MouseOverBackColor = Color.FromArgb(44, 61, 84);
+            install.Cursor = Cursors.Hand;
             install.Click += InstallClick;
-            status.SetBounds(26, 459, 588, 55);
-            Controls.AddRange(new Control[] { title, intro, packs, coverage, source, browse, fill, fillInfo, target, install, status });
-            var languageLabel = new Label { Location = new Point(26, 526), Size = new Size(115, 25) };
-            var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(150, 522), Size = new Size(240, 30) };
+            status.SetBounds(32, 543, 636, 24);
+            status.Font = new Font("Segoe UI", 9);
+            Controls.AddRange(new Control[] { brand, title, intro, packLabel, packs, coverage, source, browse, fill, fillInfo, target, install, status });
+            var languageLabel = new Label { Location = new Point(32, 590), Size = new Size(86, 25), ForeColor = muted, Font = new Font("Segoe UI", 9) };
+            var languages = new ComboBox { Name = "LanguageSelection", DropDownStyle = ComboBoxStyle.DropDownList, Location = new Point(118, 584), Size = new Size(216, 30), FlatStyle = FlatStyle.Flat, BackColor = Color.White };
             languages.Items.AddRange(new[] { Language.Text("system"), "English", "Deutsch" });
             languages.SelectedIndex = 0;
-            var donate = new Button { Name = "Donate", Location = new Point(414, 508), Size = new Size(200, 56), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
+            var donate = new Button { Name = "Donate", Location = new Point(508, 578), Size = new Size(160, 45), Tag = "https://buymeacoffee.com/forli69", FlatStyle = FlatStyle.Flat, BackgroundImageLayout = ImageLayout.Zoom, Cursor = Cursors.Hand, UseVisualStyleBackColor = false, BackColor = BackColor };
             donate.FlatAppearance.BorderSize = 0;
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brand.BuyMeACoffee.png"))
             using (var graphic = Image.FromStream(stream)) donate.BackgroundImage = new Bitmap(graphic);
@@ -191,6 +226,7 @@ namespace PubgObserver
                 {
                     title.Text = Language.Text("title");
                     intro.Text = Language.Text("intro");
+                    packLabel.Text = Language.Text("packLabel");
                     browse.Text = Language.Text("browse");
                     fill.Text = Language.Text("fill");
                     target.Text = Language.Text("target");
@@ -216,6 +252,21 @@ namespace PubgObserver
                 applyLanguage();
             };
             applyLanguage();
+        }
+
+        private static void DrawCard(Graphics graphics, Rectangle bounds)
+        {
+            const int radius = 16;
+            using (var path = new GraphicsPath())
+            {
+                path.AddArc(bounds.Left, bounds.Top, radius, radius, 180, 90);
+                path.AddArc(bounds.Right - radius, bounds.Top, radius, radius, 270, 90);
+                path.AddArc(bounds.Right - radius, bounds.Bottom - radius, radius, radius, 0, 90);
+                path.AddArc(bounds.Left, bounds.Bottom - radius, radius, radius, 90, 90);
+                path.CloseFigure();
+                using (var brush = new SolidBrush(Color.White)) graphics.FillPath(brush, path);
+                using (var pen = new Pen(Color.FromArgb(225, 230, 237))) graphics.DrawPath(pen, path);
+            }
         }
 
         private void UpdateFillOption()

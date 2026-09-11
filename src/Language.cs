@@ -18,6 +18,7 @@ namespace PubgObserver
         private static readonly Dictionary<string, string[]> texts = new Dictionary<string, string[]>
         {
             {"title", new[] {"Install observer files", "Observer-Dateien installieren"}},
+            {"packLabel", new[] {"CHOOSE YOUR ICON PACK", "DEIN ICON-PAKET"}},
             {"intro", new[] {"Choose a pack and install. All three packs are included.\nPlease close PUBG first.", "Paket auswählen und installieren. Alle drei Pakete sind enthalten.\nBitte PUBG vorher schließen."}},
             {"numbered", new[] {"Flags with numbers (default)", "Flaggen mit Nummern (Standard)"}},
             {"emojis", new[] {"Emojis", "Emojis"}},
@@ -32,7 +33,7 @@ namespace PubgObserver
             {"missing", new[] {"{0} missing team numbers up to 100 can be added.", "{0} fehlende Teamnummern bis 100 können ergänzt werden."}},
             {"complete", new[] {"All teams 1-100 are assigned.", "Alle Teams 1-100 sind zugeordnet."}},
             {"csvCheck", new[] {"Could not check the CSV: ", "CSV konnte nicht geprüft werden: "}},
-            {"target", new[] {"Target: %LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nExisting observer files are backed up automatically\nbefore being replaced.", "Ziel: %LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nVorhandene Observer-Dateien werden ersetzt und vorher automatisch\nin einem separaten Backup-Ordner gesichert."}},
+            {"target", new[] {"INSTALLATION FOLDER\n%LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nYour existing files are backed up automatically\nbefore the selected pack is installed.", "INSTALLATIONSORDNER\n%LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nDeine vorhandenen Dateien werden vor der\nInstallation automatisch gesichert."}},
             {"install", new[] {"Install", "Installieren"}},
             {"chooseFirst", new[] {"Please select an Observer folder first.", "Bitte zuerst einen Observer-Ordner auswählen."}},
             {"running", new[] {"PUBG is running. Please close the game and try again.", "PUBG läuft noch. Bitte das Spiel schließen und erneut installieren."}},
