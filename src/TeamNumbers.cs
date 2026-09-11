@@ -28,9 +28,9 @@ namespace PubgObserver
                 using (var path = new GraphicsPath())
                 using (var family = new FontFamily("Arial"))
                 {
-                    path.AddString(text, family, (int)FontStyle.Bold, 54, Point.Empty, StringFormat.GenericTypographic);
+                    path.AddString(text, family, (int)FontStyle.Bold, 60, Point.Empty, StringFormat.GenericTypographic);
                     var bounds = path.GetBounds();
-                    float textScale = Math.Min(1f, 88f / bounds.Width);
+                    float textScale = Math.Min(1f, 98f / bounds.Width);
                     using (var transform = new Matrix())
                     {
                         transform.Translate(-bounds.X, -bounds.Y);
@@ -40,10 +40,10 @@ namespace PubgObserver
                         path.Transform(transform);
                         bounds = path.GetBounds();
                         transform.Reset();
-                        transform.Translate(size - 5 - bounds.Width, size - 5 - bounds.Height);
+                        transform.Translate(size - 6 - bounds.Width, size - 6 - bounds.Height);
                         path.Transform(transform);
                     }
-                    using (var outline = new Pen(Color.Black, 5) { LineJoin = LineJoin.Round }) graphics.DrawPath(outline, path);
+                    using (var outline = new Pen(Color.Black, 8) { LineJoin = LineJoin.Round }) graphics.DrawPath(outline, path);
                     graphics.FillPath(Brushes.White, path);
                 }
             }
