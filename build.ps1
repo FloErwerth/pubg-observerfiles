@@ -17,7 +17,7 @@ foreach ($pack in @('flags-with-numbers', 'emojis', 'flags')) {
     [IO.Compression.ZipFile]::CreateFromDirectory($folder, $archive)
     $resources += "/resource:$archive,Packs.$pack.zip"
 }
-& $compiler /nologo /target:winexe /optimize+ /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll "/win32manifest:$PSScriptRoot\src\app.manifest" $resources "/out:$output\PUBG-Observer-Installer.exe" (Join-Path $PSScriptRoot 'src\Installer.cs')
+& $compiler /nologo /target:winexe /optimize+ /reference:Microsoft.VisualBasic.dll /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll "/win32manifest:$PSScriptRoot\src\app.manifest" $resources "/out:$output\PUBG-Observer-Installer.exe" (Join-Path $PSScriptRoot 'src\Installer.cs') (Join-Path $PSScriptRoot 'src\TeamCsv.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Build fehlgeschlagen.' }
 Write-Output "Erstellt: $output\PUBG-Observer-Installer.exe"
 $hash = (Get-FileHash -LiteralPath (Join-Path $output 'PUBG-Observer-Installer.exe') -Algorithm SHA256).Hash.ToLowerInvariant()

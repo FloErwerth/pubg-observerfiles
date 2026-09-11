@@ -61,3 +61,76 @@ $form.Controls['PackSelection'].SelectedIndex = 2
 if ($form.Controls['PackCoverage'].Text -notlike '*1-25*') { throw 'Abdeckung fuer Flaggen ohne Nummern fehlt.' }
 $form.Dispose()
 Write-Output 'Alle drei eingebetteten Pakete bytegenau geprueft; Flaggen mit Nummern sind vorausgewaehlt.'
+
+# Fill only missing team IDs; existing rows and image bytes must survive unchanged.
+foreach ($i in @(0, 1, 2)) {
+    $filled = Join-Path $root "filled-$i\Observer"
+    [PubgObserver.Installer]::InstallPack($i, $filled, $true) | Out-Null
+    $rows = @(Import-Csv -LiteralPath (Join-Path $filled 'TeamInfo.csv'))
+    if (($rows.TeamNumber | ForEach-Object { [int]$_ } | Sort-Object) -join ',' -ne (1..100 -join ',')) { throw 'Auffuellen ergibt keine eindeutigen Teams 1-100.' }
+    $original = Join-Path $root "embedded-$i\Observer"
+    $originalRows = @(Import-Csv -LiteralPath (Join-Path $original 'TeamInfo.csv'))
+    foreach ($originalRow in $originalRows) {
+        $updated = $rows | Where-Object TeamNumber -eq $originalRow.TeamNumber
+        if (($originalRow | ConvertTo-Json -Compress) -ne ($updated | ConvertTo-Json -Compress)) { throw 'Vorhandene Zuordnung veraendert.' }
+    }
+    foreach ($image in (Get-ChildItem -LiteralPath (Join-Path $original 'TeamIcon') -File)) {
+        if ((Get-FileHash -LiteralPath $image.FullName).Hash -ne (Get-FileHash -LiteralPath (Join-Path $filled ('TeamIcon\' + $image.Name))).Hash) { throw 'Vorhandenes Bild veraendert.' }
+    }
+    foreach ($row in $rows) {
+        $icon = Join-Path $filled ('TeamIcon\' + $row.ImageFileName)
+        if (-not (Test-Path -LiteralPath $icon)) { throw 'Ergaenztes Bild fehlt.' }
+        if ($row.ImageFileName -like 'observer-emoji-*') {
+            $emoji = Join-Path $root ('embedded-1\Observer\TeamIcon\' + $row.TeamNumber + '.png')
+            if ((Get-FileHash -LiteralPath $icon).Hash -ne (Get-FileHash -LiteralPath $emoji).Hash) { throw 'Falsches Emoji zugeordnet.' }
+        }
+    }
+    # Applying the option again to a complete result should be byte-preserving.
+    $again = Join-Path $root "again-$i\Observer"
+    [PubgObserver.Installer]::Install($filled, $again, $true) | Out-Null
+    if ((Get-FileHash -LiteralPath (Join-Path $filled 'TeamInfo.csv')).Hash -ne (Get-FileHash -LiteralPath (Join-Path $again 'TeamInfo.csv')).Hash) { throw 'Vollstaendige CSV unnoetig umgeschrieben.' }
+}
+
+# Custom column ordering, quoted commas/quotes, a gap inside the range, an extra
+# team above 100, and an existing filename collision must all be preserved.
+$custom = Join-Path $root 'custom'
+New-Item -ItemType Directory -Path (Join-Path $custom 'TeamIcon') -Force | Out-Null
+$customCsv = 'ImageFileName,TeamNumber,TeamTags,TeamName,Extra' + "`r`n" +
+    'existing.png,1,ONE,"Alpha, ""One""",keep' + "`r`n" +
+    'existing.png,3,THREE,Three,keep3' + "`r`n" +
+    'existing.png,101,EXTRA,Extra,keep101' + "`r`n"
+[IO.File]::WriteAllText((Join-Path $custom 'TeamInfo.csv'), $customCsv)
+Copy-Item -LiteralPath (Join-Path $root 'embedded-2\Observer\TeamIcon\ITA.png') -Destination (Join-Path $custom 'TeamIcon\existing.png')
+Set-Content -LiteralPath (Join-Path $custom 'TeamIcon\observer-emoji-2.png') -Value 'preserve-collision'
+$customTarget = Join-Path $root 'custom-target\Observer'
+[PubgObserver.Installer]::Install($custom, $customTarget, $true) | Out-Null
+$rows = @(Import-Csv -LiteralPath (Join-Path $customTarget 'TeamInfo.csv'))
+if ($rows.Count -ne 101 -or ($rows | Where-Object TeamNumber -eq '1').TeamName -ne 'Alpha, "One"') { throw 'Custom-CSV falsch verarbeitet.' }
+if (($rows | Where-Object TeamNumber -eq '101').Extra -ne 'keep101') { throw 'Zusatzteam verloren.' }
+if (($rows | Where-Object TeamNumber -eq '2').ImageFileName -ne 'observer-emoji-2-1.png') { throw 'Dateinamenkollision nicht behandelt.' }
+if ((Get-Content -LiteralPath (Join-Path $customTarget 'TeamIcon\observer-emoji-2.png')) -ne 'preserve-collision') { throw 'Kollision ueberschrieben.' }
+if ([IO.File]::ReadAllText((Join-Path $custom 'TeamInfo.csv')) -ne $customCsv) { throw 'Quell-CSV veraendert.' }
+
+$before = (Get-FileHash -LiteralPath (Join-Path $customTarget 'TeamInfo.csv')).Hash
+[IO.File]::AppendAllText((Join-Path $custom 'TeamInfo.csv'), "existing.png,1,DUP,Duplicate,bad`r`n")
+$rejected = $false
+try { [PubgObserver.Installer]::Install($custom, $customTarget, $true) } catch { $rejected = $true }
+if (-not $rejected -or (Get-FileHash -LiteralPath (Join-Path $customTarget 'TeamInfo.csv')).Hash -ne $before) { throw 'Ungueltige CSV hat die Installation veraendert.' }
+
+# Show invisibly to inspect actual visibility, including custom-folder changes.
+$form = New-Object PubgObserver.MainForm
+try {
+    $form.ShowInTaskbar = $false
+    $form.Opacity = 0
+    $form.Show()
+    if (-not $form.Controls['FillMissing'].Visible -or $form.Controls['FillMissing'].Checked) { throw 'Checkbox muss optional angeboten werden.' }
+    $form.Controls['FillMissing'].Checked = $true
+    $form.Controls['PackSelection'].SelectedIndex = 1
+    if ($form.Controls['FillMissing'].Visible -or $form.Controls['FillMissing'].Checked) { throw 'Checkbox bei 100 Teams nicht ausgeblendet.' }
+    $form.Controls['PackSelection'].SelectedIndex = 3
+    $form.Controls['SourceFolder'].Text = Join-Path $root 'embedded-2\Observer'
+    if (-not $form.Controls['FillMissing'].Visible) { throw 'Checkbox bei eigenem Paket fehlt.' }
+    $form.Controls['SourceFolder'].Text = Join-Path $root 'filled-2\Observer'
+    if ($form.Controls['FillMissing'].Visible) { throw 'Checkbox bei vollstaendigem eigenem Paket sichtbar.' }
+} finally { $form.Dispose() }
+Write-Output 'Emoji-Ergaenzung: alle Pakete, Luecken, bestehende Zuordnungen, Kollisionen, Custom-CSV, Fehlerfall und Checkbox erfolgreich geprueft.'

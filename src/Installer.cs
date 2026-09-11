@@ -19,7 +19,7 @@ namespace PubgObserver
         public static readonly string[] PackNames = { "Flaggen mit Nummern (Standard)", "Emojis", "Flaggen ohne Nummern" };
         public static readonly string[] PackCoverage = { "Enthaelt Bilder fuer Teams 1-50.", "Enthaelt Bilder fuer Teams 1-100.", "Enthaelt Bilder fuer Teams 1-25. Ab Team 26 ist keine Flagge definiert." };
 
-        public static string InstallPack(int index, string target)
+        public static string InstallPack(int index, string target, bool fillWithEmojis = false)
         {
             if (index < 0 || index >= PackIds.Length) throw new ArgumentOutOfRangeException("index");
             string temporary = Path.Combine(Path.GetTempPath(), "pubg-observer-" + Guid.NewGuid().ToString("N"));
@@ -41,7 +41,7 @@ namespace PubgObserver
                             using (var output = new FileStream(path, FileMode.CreateNew)) input.CopyTo(output);
                         }
                 }
-                return Install(temporary, target);
+                return Install(temporary, target, fillWithEmojis);
             }
             finally
             {
@@ -76,7 +76,7 @@ namespace PubgObserver
                 CopyTree(dir, Path.Combine(destination, Path.GetFileName(dir)));
         }
 
-        public static string Install(string source, string target)
+        public static string Install(string source, string target, bool fillWithEmojis = false)
         {
             source = Path.GetFullPath(source).TrimEnd(Path.DirectorySeparatorChar);
             target = Path.GetFullPath(target).TrimEnd(Path.DirectorySeparatorChar);
@@ -93,7 +93,11 @@ namespace PubgObserver
             string staging = Path.Combine(parent, "Observer-staging-" + suffix);
             string backup = Path.Combine(parent, "Observer-backup-" + suffix);
             // Copy completely before touching the existing installation.
-            try { CopyTree(source, staging); }
+            try
+            {
+                CopyTree(source, staging);
+                if (fillWithEmojis) TeamCsv.FillMissing(staging);
+            }
             catch (Exception ex) { throw new IOException("Kopieren fehlgeschlagen. Bestehende Dateien bleiben erhalten. Teilkopie: " + staging, ex); }
             bool existed = Directory.Exists(target);
             if (existed) Directory.Move(target, backup);
@@ -113,11 +117,13 @@ namespace PubgObserver
         private readonly ComboBox packs = new ComboBox();
         private readonly Label status = new Label();
         private readonly Button install = new Button();
+        private readonly CheckBox fill = new CheckBox();
+        private readonly Label fillInfo = new Label();
 
         public MainForm()
         {
             Text = "PUBG Observer Installer 1.1.0";
-            ClientSize = new Size(640, 455);
+            ClientSize = new Size(640, 525);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             AutoScaleMode = AutoScaleMode.Dpi;
@@ -133,6 +139,8 @@ namespace PubgObserver
             packs.Items.Add("Eigener Observer-Ordner ...");
             source.SetBounds(26, 180, 453, 30);
             source.ReadOnly = true;
+            source.Name = "SourceFolder";
+            source.TextChanged += delegate { UpdateFillOption(); };
             var browse = new Button { Text = "Auswaehlen ...", Location = new Point(489, 178), Size = new Size(125, 32) };
             browse.Click += delegate
             {
@@ -146,14 +154,35 @@ namespace PubgObserver
                 source.Visible = browse.Visible = custom;
                 coverage.Visible = !custom;
                 coverage.Text = custom || packs.SelectedIndex < 0 ? "" : Installer.PackCoverage[packs.SelectedIndex];
+                UpdateFillOption();
             };
+            fill.Name = "FillMissing";
+            fill.Text = "Fehlende Zuordnungen mit Emojis auff\u00fcllen";
+            fill.SetBounds(26, 228, 588, 28);
+            fillInfo.SetBounds(26, 260, 588, 38);
             packs.SelectedIndex = 0;
-            var target = new Label { Text = "Ziel: %LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nVorhandene Observer-Dateien werden ersetzt und vorher automatisch\nin einem separaten Backup-Ordner gesichert.", Location = new Point(26, 236), Size = new Size(588, 90) };
+            var target = new Label { Text = "Ziel: %LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nVorhandene Observer-Dateien werden ersetzt und vorher automatisch\nin einem separaten Backup-Ordner gesichert.", Location = new Point(26, 306), Size = new Size(588, 90) };
             install.Text = "Installieren";
-            install.SetBounds(26, 335, 180, 40);
+            install.SetBounds(26, 405, 180, 40);
             install.Click += InstallClick;
-            status.SetBounds(26, 389, 588, 55);
-            Controls.AddRange(new Control[] { title, intro, packs, coverage, source, browse, target, install, status });
+            status.SetBounds(26, 459, 588, 55);
+            Controls.AddRange(new Control[] { title, intro, packs, coverage, source, browse, fill, fillInfo, target, install, status });
+        }
+
+        private void UpdateFillOption()
+        {
+            fill.Checked = false;
+            fill.Visible = false;
+            fill.Enabled = false;
+            fillInfo.Text = "";
+            try
+            {
+                if (packs.SelectedIndex < 0 || (packs.SelectedIndex == 3 && String.IsNullOrWhiteSpace(source.Text))) return;
+                int missing = packs.SelectedIndex == 3 ? TeamCsv.MissingInFolder(source.Text) : TeamCsv.MissingInPack(packs.SelectedIndex);
+                fill.Visible = fill.Enabled = missing > 0;
+                fillInfo.Text = missing > 0 ? missing + " fehlende Teamnummern bis 100 koennen ergaenzt werden." : "Alle Teams 1-100 sind zugeordnet.";
+            }
+            catch (Exception ex) { fillInfo.Text = "CSV konnte nicht geprueft werden: " + ex.Message; }
         }
 
         private void InstallClick(object sender, EventArgs args)
@@ -167,7 +196,8 @@ namespace PubgObserver
                 if (gameRunning) throw new IOException("PUBG laeuft noch. Bitte das Spiel schliessen und erneut installieren.");
                 install.Enabled = false;
                 UseWaitCursor = true;
-                string backup = packs.SelectedIndex == 3 ? Installer.Install(source.Text, Installer.DefaultTarget) : Installer.InstallPack(packs.SelectedIndex, Installer.DefaultTarget);
+                bool fillMissing = fill.Enabled && fill.Checked;
+                string backup = packs.SelectedIndex == 3 ? Installer.Install(source.Text, Installer.DefaultTarget, fillMissing) : Installer.InstallPack(packs.SelectedIndex, Installer.DefaultTarget, fillMissing);
                 status.Text = "Installation abgeschlossen. Du kannst PUBG jetzt starten.";
                 MessageBox.Show(this, "Observer-Dateien installiert." + (backup == null ? "" : "\n\nSicherung:\n" + backup), "Fertig", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

@@ -31,9 +31,23 @@ Alle drei Pakete sind direkt in der EXE enthalten. Es ist kein Internetzugang un
 2. PUBG schliessen.
 3. `PUBG-Observer-Installer.exe` mit deinem normalen Windows-Benutzerkonto starten.
 4. Das gewuenschte Paket auswaehlen. **Flaggen mit Nummern** ist vorausgewaehlt.
-5. **Installieren** anklicken und auf die Erfolgsmeldung warten. Danach PUBG starten.
+5. Optional **Fehlende Zuordnungen mit Emojis auffuellen** aktivieren, um fehlende Teams bis 100 zu ergaenzen.
+6. **Installieren** anklicken und auf die Erfolgsmeldung warten. Danach PUBG starten.
 
 Das Ziel ist `%LOCALAPPDATA%\TslGame\Saved\Observer`. Administratorrechte sind nicht erforderlich.
+
+## Fehlende Zuordnungen mit Emojis auffuellen
+
+Die Checkbox erscheint, wenn die ausgewaehlte CSV nicht alle Teamnummern 1 bis 100 enthaelt. Sie ist standardmaessig ausgeschaltet und wird beim Wechsel des Pakets zurueckgesetzt. Die Pruefung funktioniert auch bei einem eigenen Observer-Ordner.
+
+- Flaggen mit Nummern: optional Emojis fuer Teams 51-100.
+- Flaggen ohne Nummern: optional Emojis fuer Teams 26-100.
+- Emojis: bereits vollstaendig, deshalb keine Checkbox.
+- Eigene CSV: auch Luecken mitten in der Teamnummernfolge werden ergaenzt.
+
+Vorhandene Teamnamen, Bildzuordnungen und Bilder bleiben erhalten. Ergaenzt wird jeweils das Emoji derselben Teamnummer aus dem enthaltenen Emoji-Paket. Neue Bilder erhalten eigene Dateinamen, sodass vorhandene Dateien nicht ueberschrieben werden. Es wird ausschliesslich die Installationskopie bearbeitet, nicht der ausgewaehlte Quellordner. Ein vorhandener CSV-Eintrag mit fehlendem Bild wird durch diese Option nicht ersetzt.
+
+Eigene CSV-Dateien muessen kommasepariert sein und eindeutige Teamnummern sowie die Spalten `TeamNumber` und `ImageFileName` enthalten. Anfuehrungszeichen in CSV-Feldern werden unterstuetzt. Fuer die CSV-Pruefung werden UTF-8 sowie BOM-markierte Unicode-Dateien unterstuetzt. Fehler beim Auffuellen lassen eine bisherige Installation unveraendert.
 
 ## Voraussetzungen
 
