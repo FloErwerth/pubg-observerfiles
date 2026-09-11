@@ -1,12 +1,12 @@
 # Enthaltene Observer-Pakete
 
-Die folgenden Pakete wurden vom Projektinhaber als lokale Downloads bereitgestellt. Die Bilddateien werden unveraendert eingebettet. Im Nummern-Paket wurden CSV-Zeilen fuer die nicht vorhandenen Icons 26 bis 40 entfernt; das Paket deckt damit Teams 1 bis 25 ab.
+Die folgenden Pakete wurden vom Projektinhaber als lokale Downloads bereitgestellt und werden unveraendert eingebettet. Seit Version 1.1.0 ersetzt das Paket "Flaggen ohne Nummern" das fruehere Nummern-Paket.
 
 | Paket | Urspruenglicher Ordner | Inhalt | Herkunft und Lizenz |
 | --- | --- | --- | --- |
 | Flaggen mit Nummern | observerfiles-flags-with-numbers | Teaminfo.csv und 50 PNGs | Nicht belegt |
 | Emojis | observerfiles-emojis | Teaminfo.csv und 100 PNGs | Nicht belegt |
-| Nummern | observerfiles-number | TeamInfo.csv und 25 PNGs | Nicht belegt |
+| Flaggen ohne Nummern | observerfiles-flags | TeamInfo.csv und 23 PNGs | Nicht belegt |
 
 Den Downloads lagen keine Lizenztexte oder Erstellerangaben bei. Die urspruenglichen Google-Drive-Links wurden nicht bereitgestellt. Die MIT-Lizenz des Installers erstreckt sich daher ausdruecklich nicht auf diese Dateien. Eine Erlaubnis zur Weitergabe dieser Pakete konnte im Rahmen der Release-Vorbereitung nicht bestaetigt werden.
 

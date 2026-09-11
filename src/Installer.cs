@@ -8,15 +8,16 @@ using System.Windows.Forms;
 
 [assembly: AssemblyTitle("PUBG Observer Installer")]
 [assembly: AssemblyDescription("Installiert lokale Observer-Pakete fuer PUBG")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 
 namespace PubgObserver
 {
     public static class Installer
     {
-        public static readonly string[] PackIds = { "flags-with-numbers", "emojis", "numbers" };
-        public static readonly string[] PackNames = { "Flaggen mit Nummern (Standard)", "Emojis", "Nummern" };
+        public static readonly string[] PackIds = { "flags-with-numbers", "emojis", "flags" };
+        public static readonly string[] PackNames = { "Flaggen mit Nummern (Standard)", "Emojis", "Flaggen ohne Nummern" };
+        public static readonly string[] PackCoverage = { "Enthaelt Bilder fuer Teams 1-50.", "Enthaelt Bilder fuer Teams 1-100.", "Enthaelt Bilder fuer Teams 1-23. Ab Team 24 ist keine Flagge definiert." };
 
         public static string InstallPack(int index, string target)
         {
@@ -115,7 +116,7 @@ namespace PubgObserver
 
         public MainForm()
         {
-            Text = "PUBG Observer Installer 1.0.0";
+            Text = "PUBG Observer Installer 1.1.0";
             ClientSize = new Size(640, 455);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
@@ -138,14 +139,21 @@ namespace PubgObserver
                 using (var dialog = new FolderBrowserDialog { Description = "Observer-Ordner mit TeamInfo.csv und TeamIcon auswaehlen", ShowNewFolderButton = false })
                     if (dialog.ShowDialog(this) == DialogResult.OK) source.Text = dialog.SelectedPath;
             };
-            packs.SelectedIndexChanged += delegate { source.Visible = browse.Visible = packs.SelectedIndex == 3; };
+            var coverage = new Label { Name = "PackCoverage", Location = new Point(26, 180), Size = new Size(588, 44) };
+            packs.SelectedIndexChanged += delegate
+            {
+                bool custom = packs.SelectedIndex == 3;
+                source.Visible = browse.Visible = custom;
+                coverage.Visible = !custom;
+                coverage.Text = custom || packs.SelectedIndex < 0 ? "" : Installer.PackCoverage[packs.SelectedIndex];
+            };
             packs.SelectedIndex = 0;
             var target = new Label { Text = "Ziel: %LOCALAPPDATA%\\TslGame\\Saved\\Observer\n\nVorhandene Observer-Dateien werden ersetzt und vorher automatisch\nin einem separaten Backup-Ordner gesichert.", Location = new Point(26, 236), Size = new Size(588, 90) };
             install.Text = "Installieren";
             install.SetBounds(26, 335, 180, 40);
             install.Click += InstallClick;
             status.SetBounds(26, 389, 588, 55);
-            Controls.AddRange(new Control[] { title, intro, packs, source, browse, target, install, status });
+            Controls.AddRange(new Control[] { title, intro, packs, coverage, source, browse, target, install, status });
         }
 
         private void InstallClick(object sender, EventArgs args)

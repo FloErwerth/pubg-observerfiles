@@ -8,6 +8,7 @@ if ($PSVersionTable.PSEdition -eq 'Core') {
 Add-Type -AssemblyName System.Windows.Forms,System.Drawing,System.IO.Compression
 [Reflection.Assembly]::LoadFrom([IO.Path]::GetFullPath($InstallerPath)) | Out-Null
 $root = Join-Path ([IO.Path]::GetTempPath()) ('pubg-observer-test-' + [Guid]::NewGuid().ToString('N'))
+if (([PubgObserver.Installer]::PackIds -join ',') -ne 'flags-with-numbers,emojis,flags') { throw 'Falsche Paketauswahl.' }
 $source = Join-Path $root 'pack'
 $target = Join-Path $root 'Saved\Observer'
 New-Item -ItemType Directory -Path (Join-Path $source 'TeamIcon') -Force | Out-Null
@@ -45,11 +46,18 @@ for ($i = 0; $i -lt 3; $i++) {
         if ((Get-FileHash -LiteralPath $file.FullName).Hash -ne (Get-FileHash -LiteralPath (Join-Path $packTarget $relative)).Hash) { throw "Datei weicht ab: $relative" }
     }
     $csv = Get-ChildItem -LiteralPath $packTarget -Filter '*.csv'
-    foreach ($row in (Import-Csv -LiteralPath $csv.FullName)) {
+    $rows = @(Import-Csv -LiteralPath $csv.FullName)
+    $expectedTeams = @(50, 100, 23)[$i]
+    if ((($rows.TeamNumber | ForEach-Object { [int]$_ } | Sort-Object) -join ',') -ne ((1..$expectedTeams) -join ',')) { throw 'Teamnummern fehlen oder sind doppelt.' }
+    foreach ($row in $rows) {
         if (-not (Test-Path -LiteralPath (Join-Path $packTarget ('TeamIcon\' + $row.ImageFileName)))) { throw "Paket verweist auf fehlendes Icon: $($row.ImageFileName)" }
+        $img = [Drawing.Image]::FromFile((Join-Path $packTarget ('TeamIcon\' + $row.ImageFileName)))
+        try { if ($img.Width -lt 1 -or $img.Height -lt 1) { throw 'Ungueltiges Bild.' } } finally { $img.Dispose() }
     }
 }
 $form = New-Object PubgObserver.MainForm
 if ($form.Controls['PackSelection'].SelectedIndex -ne 0) { throw 'Standardpaket falsch.' }
+$form.Controls['PackSelection'].SelectedIndex = 2
+if ($form.Controls['PackCoverage'].Text -notlike '*1-23*') { throw 'Abdeckung fuer Flaggen ohne Nummern fehlt.' }
 $form.Dispose()
 Write-Output 'Alle drei eingebetteten Pakete bytegenau geprueft; Flaggen mit Nummern sind vorausgewaehlt.'
